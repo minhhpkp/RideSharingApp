@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridesharingapp.R
 import com.ridesharingapp.components.ButtonComponent
 import com.ridesharingapp.components.DividerTextComponent
@@ -24,12 +25,14 @@ import com.ridesharingapp.components.PasswordTextFieldComponent
 import com.ridesharingapp.components.RegisterLoginRoutingText
 import com.ridesharingapp.components.TextFieldComponent
 import com.ridesharingapp.components.UnderlinedClickableText
+import com.ridesharingapp.data.LoginViewModel
+import com.ridesharingapp.data.UIEvent
 import com.ridesharingapp.navigation.AppRouter
 import com.ridesharingapp.navigation.Screen
 import com.ridesharingapp.navigation.SystemBackButtonHandler
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -42,11 +45,19 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(20.dp))
             TextFieldComponent(
                 labelValue = stringResource(id = R.string.email),
-                painterResource = painterResource(id = R.drawable.message)
+                painterResource = painterResource(id = R.drawable.message),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.EmailChanged(it))
+                    loginViewModel.printState()
+                }
             )
             PasswordTextFieldComponent(
                 labelValue = stringResource(id = R.string.password),
-                painterResource = painterResource(id = R.drawable.lock)
+                painterResource = painterResource(id = R.drawable.lock),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.PasswordChanged(it))
+                    loginViewModel.printState()
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
             UnderlinedClickableText(value = stringResource(id = R.string.forgot_password))

@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridesharingapp.R
 import com.ridesharingapp.components.ButtonComponent
 import com.ridesharingapp.components.CheckboxComponent
@@ -26,11 +27,13 @@ import com.ridesharingapp.components.PasswordTextFieldComponent
 import com.ridesharingapp.components.RegisterLoginRoutingText
 import com.ridesharingapp.components.TermsAndConditionsText
 import com.ridesharingapp.components.TextFieldComponent
+import com.ridesharingapp.data.LoginViewModel
+import com.ridesharingapp.data.UIEvent
 import com.ridesharingapp.navigation.AppRouter
 import com.ridesharingapp.navigation.Screen
 
 @Composable
-fun SignUpScreen() {
+fun SignUpScreen(loginViewModel: LoginViewModel = viewModel()) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -43,19 +46,35 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.height(20.dp))
             TextFieldComponent(
                 labelValue = stringResource(id = R.string.firstname),
-                painterResource(id = R.drawable.profile)
+                painterResource(id = R.drawable.profile),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.FirstNameChanged(it))
+                    loginViewModel.printState()
+                }
             )
             TextFieldComponent(
                 labelValue = stringResource(id = R.string.last_name),
-                painterResource = painterResource(id = R.drawable.profile)
+                painterResource = painterResource(id = R.drawable.profile),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.LastNameChanged(it))
+                    loginViewModel.printState()
+                }
             )
             TextFieldComponent(
                 labelValue = stringResource(id = R.string.email),
-                painterResource = painterResource(id = R.drawable.message)
+                painterResource = painterResource(id = R.drawable.message),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.EmailChanged(it))
+                    loginViewModel.printState()
+                }
             )
             PasswordTextFieldComponent(
                 labelValue = stringResource(id = R.string.password),
-                painterResource = painterResource(id = R.drawable.lock)
+                painterResource = painterResource(id = R.drawable.lock),
+                onTextChange = {
+                    loginViewModel.onEvent(UIEvent.PasswordChanged(it))
+                    loginViewModel.printState()
+                }
             )
             CheckboxComponent(
                 label = {
