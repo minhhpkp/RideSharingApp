@@ -98,7 +98,8 @@ fun HeadingTextComponent(value: String, modifier: Modifier = Modifier) {
 fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    errorStatus: Boolean
 ) {
     var textValue by remember {
         mutableStateOf("")
@@ -126,7 +127,8 @@ fun TextFieldComponent(
                 contentDescription = "profile icon"
             )
         },
-        singleLine = true
+        singleLine = true,
+        isError = errorStatus
     )
 }
 
@@ -135,7 +137,8 @@ fun TextFieldComponent(
 fun PasswordTextFieldComponent(
     labelValue: String,
     painterResource: Painter,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    errorStatus: Boolean
 ) {
     val localFocusManager = LocalFocusManager.current
     var password by remember {
@@ -196,12 +199,13 @@ fun PasswordTextFieldComponent(
         },
         visualTransformation =
             if (passwordVisible) VisualTransformation.None
-            else PasswordVisualTransformation()
+            else PasswordVisualTransformation(),
+        isError = errorStatus
     )
 }
 
 @Composable
-fun CheckboxComponent(label: @Composable () -> Unit) {
+fun CheckboxComponent(label: @Composable () -> Unit, onCheckedChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -215,6 +219,7 @@ fun CheckboxComponent(label: @Composable () -> Unit) {
             checked = checked,
             onCheckedChange = {
                 checked = it
+                onCheckedChange.invoke(it)
             }
         )
 
@@ -263,14 +268,15 @@ fun TermsAndConditionsText(onTextClickAction: (String) -> Unit) {
 }
 
 @Composable
-fun ButtonComponent(labelValue: String) {
+fun ButtonComponent(labelValue: String, onClickAction: () -> Unit, isEnabled: Boolean = false) {
     Button(
-        onClick = { /*TODO*/ },
+        onClick = onClickAction,
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp),
         contentPadding = PaddingValues(),
-        colors = ButtonDefaults.buttonColors(Color.Transparent)
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        enabled = isEnabled
     ) {
         Box(
             modifier = Modifier
@@ -379,8 +385,6 @@ fun UnderlinedClickableText(value: String) {
         text = AnnotatedString(
             text = value
         ),
-        onClick = { offset ->
-            
-        }
+        onClick = {}
     )
 }

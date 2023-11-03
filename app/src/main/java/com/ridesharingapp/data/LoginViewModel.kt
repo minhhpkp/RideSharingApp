@@ -5,32 +5,55 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.ridesharingapp.data.rules.Validator
+import com.ridesharingapp.navigation.AppRouter
+import com.ridesharingapp.navigation.Screen
 
+class LoginViewModel : ViewModel() {
+    val loginUIState by mutableStateOf(LoginUIState())
+    var allValidationPassed by mutableStateOf(false)
+    var loginInProgress by mutableStateOf(false)
 
-class LoginViewModel: ViewModel() {
-    private var registrationUIState by mutableStateOf(RegistrationUIState())
-
-    fun onEvent(event: UIEvent) {
-        when (event) {
-            is UIEvent.FirstNameChanged -> {
-                registrationUIState.firstName = event.firstName
+    fun onEvent(event: LoginUIEvent) {
+        when(event) {
+            is LoginUIEvent.EmailChanged -> {
+                loginUIState.email = event.email
+                val emailValidationResult = Validator.validateEmail(event.email)
+                loginUIState.emailErrorStatus.value = !emailValidationResult.status
             }
-            is UIEvent.LastNameChanged -> {
-                registrationUIState.lastName = event.lastName
+            is LoginUIEvent.PasswordChanged -> {
+                loginUIState.password = event.password
+                val passwordValidationResult = Validator.validatePassword(event.password)
+                loginUIState.passwordErrorStatus.value = !passwordValidationResult.status
             }
-            is UIEvent.EmailChanged -> {
-                registrationUIState.email = event.email
-            }
-            is UIEvent.PasswordChanged -> {
-                registrationUIState.password = event.password
+            is LoginUIEvent.LoginButtonClicked -> {
+                login()
             }
         }
+        allValidationPassed =
+            !loginUIState.emailErrorStatus.value
+            && !loginUIState.passwordErrorStatus.value
     }
 
-    private var TAG = LoginViewModel::class.simpleName
-
-    fun printState() {
-        Log.d(TAG, "Inside printState")
-        Log.d(TAG, registrationUIState.toString())
+    private fun login() {
+        loginInProgress = true
+        FirebaseAuth
+            .getInstance()
+            .signInWithEmailAndPassword(
+                loginUIState.email,
+                loginUIState.password
+            )
+            .addOnCompleteListener{
+                if (it.isSuccessful) {
+                    AppRouter.navigateTo(Screen.HomeScreen)
+                }
+                loginInProgress = false
+            }
+            .addOnFailureListener{
+                Log.d(_tag, "Login Failed")
+            }
     }
+
+    private val _tag = LoginViewModel::class.simpleName
 }

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.ridesharingapp.navigation.AppRouter
 import com.ridesharingapp.navigation.Screen
+import com.ridesharingapp.screens.HomeScreen
 import com.ridesharingapp.screens.LoginScreen
 import com.ridesharingapp.screens.SignUpScreen
 import com.ridesharingapp.screens.TermsAndConditionsScreen
@@ -28,6 +29,9 @@ fun RideSharingApp(modifier: Modifier = Modifier) {
                 }
                 is Screen.LoginScreen -> {
                     LoginScreen()
+                }
+                is Screen.HomeScreen -> {
+                    HomeScreen()
                 }
             }
         }
