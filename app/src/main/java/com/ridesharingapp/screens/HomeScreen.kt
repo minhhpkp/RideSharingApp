@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,10 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ridesharingapp.components.ButtonComponent
 import com.ridesharingapp.components.HeadingTextComponent
-import com.ridesharingapp.data.RegistrationViewModel
+import com.ridesharingapp.data.home.HomeViewModel
 
 @Composable
-fun HomeScreen(registrationViewModel: RegistrationViewModel = viewModel()) {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -29,10 +30,14 @@ fun HomeScreen(registrationViewModel: RegistrationViewModel = viewModel()) {
             ButtonComponent(
                 labelValue = "Sign out",
                 onClickAction = {
-                    registrationViewModel.signOut()
+                    homeViewModel.signOut()
                 },
                 isEnabled = true
             )
+
+            if (homeViewModel.signOutInProgress) {
+                CircularProgressIndicator()
+            }
         }
     }
 }

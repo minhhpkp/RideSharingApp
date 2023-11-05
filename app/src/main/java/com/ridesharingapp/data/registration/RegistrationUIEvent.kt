@@ -1,4 +1,4 @@
-package com.ridesharingapp.data
+package com.ridesharingapp.data.registration
 
 sealed class RegistrationUIEvent{
     data class FirstNameChanged(val firstName: String) : RegistrationUIEvent()

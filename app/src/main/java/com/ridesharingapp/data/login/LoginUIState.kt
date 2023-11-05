@@ -1,4 +1,4 @@
-package com.ridesharingapp.data
+package com.ridesharingapp.data.login
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

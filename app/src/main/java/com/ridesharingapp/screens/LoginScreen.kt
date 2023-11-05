@@ -28,8 +28,8 @@ import com.ridesharingapp.components.PasswordTextFieldComponent
 import com.ridesharingapp.components.RegisterLoginRoutingText
 import com.ridesharingapp.components.TextFieldComponent
 import com.ridesharingapp.components.UnderlinedClickableText
-import com.ridesharingapp.data.LoginUIEvent
-import com.ridesharingapp.data.LoginViewModel
+import com.ridesharingapp.data.login.LoginUIEvent
+import com.ridesharingapp.data.login.LoginViewModel
 import com.ridesharingapp.navigation.AppRouter
 import com.ridesharingapp.navigation.Screen
 import com.ridesharingapp.navigation.SystemBackButtonHandler

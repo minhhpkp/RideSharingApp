@@ -29,8 +29,8 @@ import com.ridesharingapp.components.PasswordTextFieldComponent
 import com.ridesharingapp.components.RegisterLoginRoutingText
 import com.ridesharingapp.components.TermsAndConditionsText
 import com.ridesharingapp.components.TextFieldComponent
-import com.ridesharingapp.data.RegistrationViewModel
-import com.ridesharingapp.data.RegistrationUIEvent
+import com.ridesharingapp.data.registration.RegistrationViewModel
+import com.ridesharingapp.data.registration.RegistrationUIEvent
 import com.ridesharingapp.navigation.AppRouter
 import com.ridesharingapp.navigation.Screen
 

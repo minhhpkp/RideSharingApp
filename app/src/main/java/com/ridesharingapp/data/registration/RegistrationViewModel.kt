@@ -1,4 +1,4 @@
-package com.ridesharingapp.data
+package com.ridesharingapp.data.registration
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -82,20 +82,6 @@ class RegistrationViewModel : ViewModel() {
                 Log.d(_tag, "Exception = ${it.message}")
                 Log.d(_tag, "Exception = ${it.localizedMessage}")
             }
-    }
-
-    fun signOut() {
-        val firebaseAuth = FirebaseAuth.getInstance()
-        firebaseAuth.signOut()
-
-        firebaseAuth.addAuthStateListener{
-            if (it.currentUser == null) {
-                Log.d(_tag, "Signed out successfully")
-                AppRouter.navigateTo(Screen.LoginScreen)
-            } else {
-                Log.d(_tag, "Failed to sign out")
-            }
-        }
     }
 
     private var _tag = RegistrationViewModel::class.simpleName
