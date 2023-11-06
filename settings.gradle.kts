@@ -14,4 +14,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Ride Sharing App"
-include(":app")
+include(":passengersideapp")
+include(":driversideapp")
+include(":common")
