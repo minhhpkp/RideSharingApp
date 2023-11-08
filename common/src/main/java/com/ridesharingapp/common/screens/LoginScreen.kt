@@ -20,12 +20,14 @@ import androidx.compose.ui.unit.dp
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.components.ButtonComponent
 import com.ridesharingapp.common.components.DividerTextComponent
+import com.ridesharingapp.common.components.ErrorText
 import com.ridesharingapp.common.components.HeadingTextComponent
 import com.ridesharingapp.common.components.NormalTextComponent
 import com.ridesharingapp.common.components.PasswordTextFieldComponent
 import com.ridesharingapp.common.components.RegisterLoginRoutingText
 import com.ridesharingapp.common.components.TextFieldComponent
 import com.ridesharingapp.common.components.UnderlinedClickableText
+import com.ridesharingapp.common.components.UserAuthenticationFailedAlertDialog
 import com.ridesharingapp.common.data.login.LoginUIEvent
 import com.ridesharingapp.common.data.login.LoginViewModel
 import com.ridesharingapp.common.navigation.AppRouter
@@ -51,14 +53,20 @@ fun <Screen> LoginScreen(
                 NormalTextComponent(value = stringResource(id = R.string.hello))
                 HeadingTextComponent(value = stringResource(id = R.string.welcome))
                 Spacer(modifier = Modifier.height(20.dp))
+
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.email),
                     painterResource = painterResource(id = R.drawable.message),
                     onTextChange = {
                         loginViewModel.onEvent(LoginUIEvent.EmailChanged(it))
                     },
-                    errorStatus = loginViewModel.loginUIState.emailErrorStatus.value
+                    errorStatus = loginViewModel.loginUIState.emailErrorStatus.value,
+                    isEmail = true
                 )
+                if (loginViewModel.loginUIState.emailErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(id = R.string.incorrect_email_format))
+                }
+
                 PasswordTextFieldComponent(
                     labelValue = stringResource(id = R.string.password),
                     painterResource = painterResource(id = R.drawable.lock),
@@ -67,6 +75,10 @@ fun <Screen> LoginScreen(
                     },
                     errorStatus = loginViewModel.loginUIState.passwordErrorStatus.value
                 )
+                if (loginViewModel.loginUIState.passwordErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(id = R.string.password_format_error_message))
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 UnderlinedClickableText(value = stringResource(id = R.string.forgot_password))
 
@@ -88,9 +100,15 @@ fun <Screen> LoginScreen(
                 }
             }
         }
-        if (loginViewModel.isLoginInProgress().value) {
+        if (loginViewModel.isLoginInProgress()) {
             CircularProgressIndicator()
         }
+    }
+
+    if (loginViewModel.isLoginFailed()) {
+        UserAuthenticationFailedAlertDialog(
+            dismiss = { loginViewModel.dismissFailureMessage() }
+        )
     }
 
     SystemBackButtonHandler {

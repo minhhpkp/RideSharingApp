@@ -21,12 +21,14 @@ import com.ridesharingapp.common.R
 import com.ridesharingapp.common.components.ButtonComponent
 import com.ridesharingapp.common.components.CheckboxComponent
 import com.ridesharingapp.common.components.DividerTextComponent
+import com.ridesharingapp.common.components.ErrorText
 import com.ridesharingapp.common.components.HeadingTextComponent
 import com.ridesharingapp.common.components.NormalTextComponent
 import com.ridesharingapp.common.components.PasswordTextFieldComponent
 import com.ridesharingapp.common.components.RegisterLoginRoutingText
 import com.ridesharingapp.common.components.TermsAndConditionsText
 import com.ridesharingapp.common.components.TextFieldComponent
+import com.ridesharingapp.common.components.UserAuthenticationFailedAlertDialog
 import com.ridesharingapp.common.data.registration.RegistrationUIEvent
 import com.ridesharingapp.common.data.registration.RegistrationViewModel
 import com.ridesharingapp.common.navigation.AppRouter
@@ -52,6 +54,7 @@ fun <Screen> SignUpScreen(
                 NormalTextComponent(value = stringResource(id = R.string.hello))
                 HeadingTextComponent(value = stringResource(id = R.string.create_account))
                 Spacer(modifier = Modifier.height(20.dp))
+
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.firstname),
                     painterResource(id = R.drawable.profile),
@@ -60,6 +63,10 @@ fun <Screen> SignUpScreen(
                     },
                     errorStatus = registrationViewModel.registrationUIState.firstNameErrorStatus.value
                 )
+                if (registrationViewModel.registrationUIState.firstNameErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(R.string.name_format_error_message))
+                }
+
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.last_name),
                     painterResource = painterResource(id = R.drawable.profile),
@@ -68,14 +75,23 @@ fun <Screen> SignUpScreen(
                     },
                     errorStatus = registrationViewModel.registrationUIState.lastNameErrorStatus.value
                 )
+                if (registrationViewModel.registrationUIState.lastNameErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(R.string.name_format_error_message))
+                }
+
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.email),
                     painterResource = painterResource(id = R.drawable.message),
                     onTextChange = {
                         registrationViewModel.onEvent(RegistrationUIEvent.EmailChanged(it))
                     },
-                    errorStatus = registrationViewModel.registrationUIState.emailErrorStatus.value
+                    errorStatus = registrationViewModel.registrationUIState.emailErrorStatus.value,
+                    isEmail = true
                 )
+                if (registrationViewModel.registrationUIState.emailErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(R.string.incorrect_email_format))
+                }
+
                 PasswordTextFieldComponent(
                     labelValue = stringResource(id = R.string.password),
                     painterResource = painterResource(id = R.drawable.lock),
@@ -84,6 +100,10 @@ fun <Screen> SignUpScreen(
                     },
                     errorStatus = registrationViewModel.registrationUIState.passwordErrorStatus.value
                 )
+                if (registrationViewModel.registrationUIState.passwordErrorStatus.value) {
+                    ErrorText(errorMessage = stringResource(R.string.password_format_error_message))
+                }
+
                 CheckboxComponent(
                     label = {
                         TermsAndConditionsText(onTextClickAction = {
@@ -116,5 +136,12 @@ fun <Screen> SignUpScreen(
         if (registrationViewModel.isRegistrationInProgress()) {
             CircularProgressIndicator()
         }
+    }
+
+    if (registrationViewModel.isRegistrationFailed()) {
+        UserAuthenticationFailedAlertDialog(
+            message = stringResource(registrationViewModel.failureMessage),
+            dismiss = { registrationViewModel.dismissFailureMessage() }
+        )
     }
 }

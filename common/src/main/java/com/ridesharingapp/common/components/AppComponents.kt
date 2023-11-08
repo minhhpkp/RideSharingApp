@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -22,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -99,7 +101,8 @@ fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
-    errorStatus: Boolean
+    errorStatus: Boolean,
+    isEmail: Boolean = false
 ) {
     var textValue by remember {
         mutableStateOf("")
@@ -116,7 +119,10 @@ fun TextFieldComponent(
             focusedLabelColor = Primary,
             cursorColor = Primary,
         ),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (isEmail) KeyboardType.Email else KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
         onValueChange = {
             textValue = it
             onTextChange(it)
@@ -386,5 +392,31 @@ fun UnderlinedClickableText(value: String) {
             text = value
         ),
         onClick = {}
+    )
+}
+
+@Composable
+fun ErrorText(errorMessage: String) {
+    Text(
+        text = errorMessage,
+        color = Color.Red,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun UserAuthenticationFailedAlertDialog(
+    message: String = stringResource(R.string.incorrect_email_or_password_please_try_again),
+    dismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { dismiss() },
+        confirmButton = {
+            TextButton(onClick = { dismiss() }) {
+                Text(text = "OK")
+            }
+        },
+        title = { Text(text = "Error")},
+        text = { Text(text = message) }
     )
 }

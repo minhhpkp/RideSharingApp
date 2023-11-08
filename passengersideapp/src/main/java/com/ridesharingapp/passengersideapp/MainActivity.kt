@@ -1,6 +1,7 @@
 package com.ridesharingapp.passengersideapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.Crossfade
@@ -9,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.auth.FirebaseAuth
 import com.ridesharingapp.common.navigation.AppRouter
 import com.ridesharingapp.common.screens.LoginScreen
 import com.ridesharingapp.common.screens.SignUpScreen
@@ -25,13 +27,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RideSharingApp()
+            ScreenNavigation()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null) {
+            currentUser.email?.let { Log.d("MainActivity.onStart", it) }
+            appRouter.navigateTo(Screen.HomeScreen)
         }
     }
 }
 
 @Composable
-fun RideSharingApp() {
+fun ScreenNavigation() {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White

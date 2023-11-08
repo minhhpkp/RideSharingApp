@@ -4,11 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.ridesharingapp.common.R
 import com.ridesharingapp.common.data.rules.Validator
 
 abstract class RegistrationViewModel : ViewModel() {
     val registrationUIState by mutableStateOf(RegistrationUIState())
     private var allValidationPassed by mutableStateOf(false)
+    var failureMessage = R.string.failed_to_sign_up_please_try_again
 
     fun onEvent(event: RegistrationUIEvent) {
         when (event) {
@@ -36,7 +38,12 @@ abstract class RegistrationViewModel : ViewModel() {
                 registrationUIState.termsConditionReadState.value = event.checked
             }
             is RegistrationUIEvent.RegisterButtonClicked -> {
-                onRegisterButtonClick()
+                onEvent(RegistrationUIEvent.FirstNameChanged(registrationUIState.firstName))
+                onEvent(RegistrationUIEvent.LastNameChanged(registrationUIState.lastName))
+                onEvent(RegistrationUIEvent.EmailChanged(registrationUIState.email))
+                onEvent(RegistrationUIEvent.PasswordChanged(registrationUIState.password))
+                onEvent(RegistrationUIEvent.TermsConditionChecked(registrationUIState.termsConditionReadState.value))
+                if (allValidationPassed) onRegisterButtonClick()
             }
         }
         allValidationPassed = (
@@ -53,6 +60,10 @@ abstract class RegistrationViewModel : ViewModel() {
     }
 
     abstract fun isRegistrationInProgress(): Boolean
+
+    abstract fun isRegistrationFailed(): Boolean
+
+    abstract fun dismissFailureMessage()
 
     abstract fun onRegisterButtonClick()
 }

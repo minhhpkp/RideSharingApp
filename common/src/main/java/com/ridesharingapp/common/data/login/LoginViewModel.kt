@@ -1,6 +1,5 @@
 package com.ridesharingapp.common.data.login
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,19 +23,24 @@ abstract class LoginViewModel : ViewModel() {
                 loginUIState.passwordErrorStatus.value = !passwordValidationResult.status
             }
             is LoginUIEvent.LoginButtonClicked -> {
-                onLoginButtonClick()
+                onEvent(LoginUIEvent.EmailChanged(loginUIState.email))
+                onEvent(LoginUIEvent.PasswordChanged(loginUIState.password))
+                if (allValidationPassed) onLoginButtonClick()
             }
         }
-        allValidationPassed =
-            !loginUIState.emailErrorStatus.value
-                    && !loginUIState.passwordErrorStatus.value
+        allValidationPassed = !loginUIState.emailErrorStatus.value
+            && !loginUIState.passwordErrorStatus.value
     }
 
     fun isAllValidationPassed(): Boolean {
         return allValidationPassed
     }
 
-    abstract fun isLoginInProgress(): MutableState<Boolean>
+    abstract fun isLoginInProgress(): Boolean
+
+    abstract fun isLoginFailed(): Boolean
+
+    abstract fun dismissFailureMessage()
 
     abstract fun onLoginButtonClick()
 }
