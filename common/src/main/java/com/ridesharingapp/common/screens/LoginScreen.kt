@@ -30,15 +30,10 @@ import com.ridesharingapp.common.components.UnderlinedClickableText
 import com.ridesharingapp.common.components.UserAuthenticationFailedAlertDialog
 import com.ridesharingapp.common.data.login.LoginUIEvent
 import com.ridesharingapp.common.data.login.LoginViewModel
-import com.ridesharingapp.common.navigation.AppRouter
 import com.ridesharingapp.common.navigation.SystemBackButtonHandler
 
 @Composable
-fun <Screen> LoginScreen(
-    loginViewModel: LoginViewModel,
-    appRouter: AppRouter<Screen>,
-    signUpScreen: Screen
-) {
+fun <Screen> LoginScreen(loginViewModel: LoginViewModel<Screen>) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -95,7 +90,7 @@ fun <Screen> LoginScreen(
                     )
                     DividerTextComponent()
                     RegisterLoginRoutingText(tryingToLogin = false, onTextClickAction = {
-                        appRouter.navigateTo(signUpScreen)
+                        loginViewModel.onEvent(LoginUIEvent.SignUpTextClicked)
                     })
                 }
             }
@@ -112,6 +107,6 @@ fun <Screen> LoginScreen(
     }
 
     SystemBackButtonHandler {
-        appRouter.navigateTo(signUpScreen)
+        loginViewModel.onEvent(LoginUIEvent.BackButtonClicked)
     }
 }

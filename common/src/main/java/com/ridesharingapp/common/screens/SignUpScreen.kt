@@ -31,14 +31,9 @@ import com.ridesharingapp.common.components.TextFieldComponent
 import com.ridesharingapp.common.components.UserAuthenticationFailedAlertDialog
 import com.ridesharingapp.common.data.registration.RegistrationUIEvent
 import com.ridesharingapp.common.data.registration.RegistrationViewModel
-import com.ridesharingapp.common.navigation.AppRouter
 
 @Composable
-fun <Screen> SignUpScreen(
-    registrationViewModel: RegistrationViewModel,
-    appRouter: AppRouter<Screen>,
-    termsAndConditionsScreen: Screen,
-    loginScreen: Screen)
+fun <Screen> SignUpScreen(registrationViewModel: RegistrationViewModel<Screen>)
 {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -107,11 +102,11 @@ fun <Screen> SignUpScreen(
                 CheckboxComponent(
                     label = {
                         TermsAndConditionsText(onTextClickAction = {
-                            appRouter.navigateTo(termsAndConditionsScreen)
+                            registrationViewModel.onEvent(RegistrationUIEvent.TermsAndConditionsTextClicked)
                         })
                     },
                     onCheckedChange = {
-                        registrationViewModel.onEvent(RegistrationUIEvent.TermsConditionChecked(it))
+                        registrationViewModel.onEvent(RegistrationUIEvent.TermsConditionChanged(it))
                     }
                 )
                 Column(
@@ -127,7 +122,7 @@ fun <Screen> SignUpScreen(
                     )
                     DividerTextComponent()
                     RegisterLoginRoutingText(tryingToLogin = true, onTextClickAction = {
-                        appRouter.navigateTo(loginScreen)
+                        registrationViewModel.onEvent(RegistrationUIEvent.LoginTextClicked)
                     })
                 }
             }

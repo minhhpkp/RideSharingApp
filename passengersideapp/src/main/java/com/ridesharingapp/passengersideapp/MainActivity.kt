@@ -11,23 +11,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.firebase.auth.FirebaseAuth
+import com.ridesharingapp.common.data.login.LoginViewModel
+import com.ridesharingapp.common.data.registration.RegistrationViewModel
 import com.ridesharingapp.common.navigation.AppRouter
 import com.ridesharingapp.common.screens.LoginScreen
 import com.ridesharingapp.common.screens.SignUpScreen
 import com.ridesharingapp.common.screens.TermsAndConditionsScreen
 import com.ridesharingapp.passengersideapp.data.home.HomeViewModel
-import com.ridesharingapp.passengersideapp.data.login.PassengerSideLoginViewModel
-import com.ridesharingapp.passengersideapp.data.registration.PassengerSideRegistrationViewModel
 import com.ridesharingapp.passengersideapp.navigation.Screen
 import com.ridesharingapp.passengersideapp.screens.HomeScreen
 
 val appRouter = AppRouter<Screen>(Screen.SignUpScreen)
 
 class MainActivity : ComponentActivity() {
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        auth = FirebaseAuth.getInstance()
+
         setContent {
-            ScreenNavigation()
+            ScreenNavigation(auth = auth)
         }
     }
 
@@ -43,7 +48,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ScreenNavigation() {
+fun ScreenNavigation(auth: FirebaseAuth) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -52,10 +57,13 @@ fun ScreenNavigation() {
             when (it.value) {
                 is Screen.SignUpScreen -> {
                     SignUpScreen(
-                        registrationViewModel = PassengerSideRegistrationViewModel(appRouter),
-                        appRouter = appRouter,
-                        termsAndConditionsScreen = Screen.TermsAndConditionsScreen,
-                        loginScreen = Screen.LoginScreen
+                        registrationViewModel = RegistrationViewModel(
+                            appRouter = appRouter,
+                            termsAndConditionScreen = Screen.TermsAndConditionsScreen,
+                            loginScreen = Screen.LoginScreen,
+                            authSuccessScreen = Screen.HomeScreen,
+                            auth = auth
+                        )
                     )
                 }
                 is Screen.TermsAndConditionsScreen -> {
@@ -66,9 +74,13 @@ fun ScreenNavigation() {
                 }
                 is Screen.LoginScreen -> {
                     LoginScreen(
-                        loginViewModel = PassengerSideLoginViewModel(appRouter),
-                        appRouter = appRouter,
-                        signUpScreen = Screen.SignUpScreen)
+                        loginViewModel = LoginViewModel(
+                            appRouter = appRouter,
+                            signUpScreen = Screen.SignUpScreen,
+                            authSuccessScreen = Screen.HomeScreen,
+                            auth = auth
+                        )
+                    )
                 }
                 is Screen.HomeScreen -> {
                     HomeScreen(

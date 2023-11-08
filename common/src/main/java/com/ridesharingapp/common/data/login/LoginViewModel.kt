@@ -1,14 +1,24 @@
 package com.ridesharingapp.common.data.login
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.ridesharingapp.common.data.rules.Validator
+import com.ridesharingapp.common.navigation.AppRouter
 
-abstract class LoginViewModel : ViewModel() {
+class LoginViewModel<Screen>(
+    private val appRouter: AppRouter<Screen>,
+    private val signUpScreen: Screen,
+    private val authSuccessScreen: Screen,
+    private val auth: FirebaseAuth
+) : ViewModel() {
     val loginUIState by mutableStateOf(LoginUIState())
     private var allValidationPassed by mutableStateOf(false)
+    private var loginInProgress by mutableStateOf(false)
+    private var loginFailed by mutableStateOf(false)
 
     fun onEvent(event: LoginUIEvent) {
         when(event) {
@@ -27,6 +37,12 @@ abstract class LoginViewModel : ViewModel() {
                 onEvent(LoginUIEvent.PasswordChanged(loginUIState.password))
                 if (allValidationPassed) onLoginButtonClick()
             }
+            is LoginUIEvent.SignUpTextClicked -> {
+                appRouter.navigateTo(signUpScreen)
+            }
+            is LoginUIEvent.BackButtonClicked -> {
+                appRouter.navigateTo(signUpScreen)
+            }
         }
         allValidationPassed = !loginUIState.emailErrorStatus.value
             && !loginUIState.passwordErrorStatus.value
@@ -36,11 +52,33 @@ abstract class LoginViewModel : ViewModel() {
         return allValidationPassed
     }
 
-    abstract fun isLoginInProgress(): Boolean
+    fun isLoginInProgress(): Boolean {
+        return loginInProgress
+    }
 
-    abstract fun isLoginFailed(): Boolean
+    fun isLoginFailed(): Boolean {
+        return loginFailed
+    }
 
-    abstract fun dismissFailureMessage()
+    fun dismissFailureMessage() {
+        loginFailed = false
+    }
 
-    abstract fun onLoginButtonClick()
+    private fun onLoginButtonClick() {
+        loginInProgress = true
+        auth.signInWithEmailAndPassword(
+                loginUIState.email,
+                loginUIState.password
+            )
+            .addOnCompleteListener{
+                loginInProgress = false
+                if (it.isSuccessful) {
+                    Log.d("Login", "signInWithEmail:success")
+                    appRouter.navigateTo(authSuccessScreen)
+                } else {
+                    Log.w("Login", "signInWithEmail:failure", it.exception)
+                    loginFailed = true
+                }
+            }
+    }
 }
