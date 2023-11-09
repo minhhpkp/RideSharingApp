@@ -13,6 +13,7 @@ class LoginViewModel<Screen>(
     private val appRouter: AppRouter<Screen>,
     private val signUpScreen: Screen,
     private val authSuccessScreen: Screen,
+    private val forgotPasswordScreen: Screen,
     private val auth: FirebaseAuth
 ) : ViewModel() {
     val loginUIState by mutableStateOf(LoginUIState())
@@ -42,6 +43,9 @@ class LoginViewModel<Screen>(
             }
             is LoginUIEvent.BackButtonClicked -> {
                 appRouter.navigateTo(signUpScreen)
+            }
+            is LoginUIEvent.ForgotPasswordTextClicked -> {
+                appRouter.navigateTo(forgotPasswordScreen)
             }
         }
         allValidationPassed = !loginUIState.emailErrorStatus.value

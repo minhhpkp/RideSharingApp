@@ -21,7 +21,6 @@ import com.ridesharingapp.common.R
 import com.ridesharingapp.common.components.ButtonComponent
 import com.ridesharingapp.common.components.CheckboxComponent
 import com.ridesharingapp.common.components.DividerTextComponent
-import com.ridesharingapp.common.components.ErrorText
 import com.ridesharingapp.common.components.HeadingTextComponent
 import com.ridesharingapp.common.components.NormalTextComponent
 import com.ridesharingapp.common.components.PasswordTextFieldComponent
@@ -56,11 +55,9 @@ fun <Screen> SignUpScreen(registrationViewModel: RegistrationViewModel<Screen>)
                     onTextChange = {
                         registrationViewModel.onEvent(RegistrationUIEvent.FirstNameChanged(it))
                     },
-                    errorStatus = registrationViewModel.registrationUIState.firstNameErrorStatus.value
+                    errorStatus = registrationViewModel.registrationUIState.firstNameErrorStatus.value,
+                    errorMessage = stringResource(R.string.name_format_error_message)
                 )
-                if (registrationViewModel.registrationUIState.firstNameErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(R.string.name_format_error_message))
-                }
 
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.last_name),
@@ -68,11 +65,9 @@ fun <Screen> SignUpScreen(registrationViewModel: RegistrationViewModel<Screen>)
                     onTextChange = {
                         registrationViewModel.onEvent(RegistrationUIEvent.LastNameChanged(it))
                     },
-                    errorStatus = registrationViewModel.registrationUIState.lastNameErrorStatus.value
+                    errorStatus = registrationViewModel.registrationUIState.lastNameErrorStatus.value,
+                    errorMessage = stringResource(R.string.name_format_error_message)
                 )
-                if (registrationViewModel.registrationUIState.lastNameErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(R.string.name_format_error_message))
-                }
 
                 TextFieldComponent(
                     labelValue = stringResource(id = R.string.email),
@@ -81,11 +76,9 @@ fun <Screen> SignUpScreen(registrationViewModel: RegistrationViewModel<Screen>)
                         registrationViewModel.onEvent(RegistrationUIEvent.EmailChanged(it))
                     },
                     errorStatus = registrationViewModel.registrationUIState.emailErrorStatus.value,
-                    isEmail = true
+                    isEmail = true,
+                    errorMessage = stringResource(R.string.incorrect_email_format)
                 )
-                if (registrationViewModel.registrationUIState.emailErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(R.string.incorrect_email_format))
-                }
 
                 PasswordTextFieldComponent(
                     labelValue = stringResource(id = R.string.password),
@@ -95,9 +88,6 @@ fun <Screen> SignUpScreen(registrationViewModel: RegistrationViewModel<Screen>)
                     },
                     errorStatus = registrationViewModel.registrationUIState.passwordErrorStatus.value
                 )
-                if (registrationViewModel.registrationUIState.passwordErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(R.string.password_format_error_message))
-                }
 
                 CheckboxComponent(
                     label = {

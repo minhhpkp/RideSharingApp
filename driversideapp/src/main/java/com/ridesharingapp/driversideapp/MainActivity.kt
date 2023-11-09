@@ -10,10 +10,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.ridesharingapp.common.data.forgotpassword.ForgotPasswordViewModel
 import com.ridesharingapp.common.data.login.LoginViewModel
 import com.ridesharingapp.common.data.registration.RegistrationViewModel
 import com.ridesharingapp.common.navigation.AppRouter
+import com.ridesharingapp.common.screens.ForgotPasswordScreen
 import com.ridesharingapp.common.screens.LoginScreen
 import com.ridesharingapp.common.screens.SignUpScreen
 import com.ridesharingapp.common.screens.TermsAndConditionsScreen
@@ -56,12 +61,19 @@ fun RideSharingApp(auth: FirebaseAuth) {
             when (it.value) {
                 is Screen.SignUpScreen -> {
                     SignUpScreen(
-                        registrationViewModel = RegistrationViewModel(
-                            appRouter = appRouter,
-                            termsAndConditionScreen = Screen.TermsAndConditionsScreen,
-                            loginScreen = Screen.LoginScreen,
-                            authSuccessScreen = Screen.HomeScreen,
-                            auth = auth
+                        registrationViewModel = viewModel<RegistrationViewModel<Screen>>(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return RegistrationViewModel(
+                                        appRouter = appRouter,
+                                        termsAndConditionScreen = Screen.TermsAndConditionsScreen,
+                                        loginScreen = Screen.LoginScreen,
+                                        authSuccessScreen = Screen.HomeScreen,
+                                        auth = auth
+                                    ) as T
+                                }
+                            }
                         )
                     )
                 }
@@ -73,17 +85,44 @@ fun RideSharingApp(auth: FirebaseAuth) {
                 }
                 is Screen.LoginScreen -> {
                     LoginScreen(
-                        loginViewModel = LoginViewModel(
-                            appRouter = appRouter,
-                            signUpScreen = Screen.SignUpScreen,
-                            authSuccessScreen = Screen.HomeScreen,
-                            auth = auth
+                        loginViewModel = viewModel<LoginViewModel<Screen>>(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return LoginViewModel(
+                                        appRouter = appRouter,
+                                        signUpScreen = Screen.SignUpScreen,
+                                        authSuccessScreen = Screen.HomeScreen,
+                                        auth = auth,
+                                        forgotPasswordScreen = Screen.ForgotPasswordScreen
+                                    ) as T
+                                }
+                            }
+                        )
+                    )
+                }
+                is Screen.ForgotPasswordScreen -> {
+                    ForgotPasswordScreen(
+                        forgotPasswordViewModel = viewModel<ForgotPasswordViewModel<Screen>>(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return ForgotPasswordViewModel(auth, appRouter, Screen.LoginScreen) as T
+                                }
+                            }
                         )
                     )
                 }
                 is Screen.HomeScreen -> {
                     HomeScreen(
-                        homeViewModel = HomeViewModel(appRouter)
+                        homeViewModel = viewModel(
+                            factory = object : ViewModelProvider.Factory {
+                                @Suppress("UNCHECKED_CAST")
+                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                    return HomeViewModel(appRouter) as T
+                                }
+                            }
+                        )
                     )
                 }
             }

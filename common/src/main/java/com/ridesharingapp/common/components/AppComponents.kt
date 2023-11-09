@@ -101,7 +101,8 @@ fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
-    errorStatus: Boolean,
+    errorMessage: String = "",
+    errorStatus: Boolean = false,
     isEmail: Boolean = false
 ) {
     var textValue by remember {
@@ -136,6 +137,10 @@ fun TextFieldComponent(
         singleLine = true,
         isError = errorStatus
     )
+
+    if (errorStatus) {
+        ErrorText(errorMessage = errorMessage)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -208,6 +213,10 @@ fun PasswordTextFieldComponent(
         else PasswordVisualTransformation(),
         isError = errorStatus
     )
+
+    if (errorStatus) {
+        ErrorText(errorMessage = stringResource(id = R.string.password_format_error_message))
+    }
 }
 
 @Composable
@@ -375,7 +384,7 @@ fun RegisterLoginRoutingText(tryingToLogin: Boolean, onTextClickAction: (String)
 }
 
 @Composable
-fun UnderlinedClickableText(value: String) {
+fun UnderlinedClickableText(value: String, onClick: () -> Unit) {
     ClickableText(
         modifier = Modifier
             .fillMaxWidth()
@@ -391,7 +400,7 @@ fun UnderlinedClickableText(value: String) {
         text = AnnotatedString(
             text = value
         ),
-        onClick = {}
+        onClick = { onClick() }
     )
 }
 

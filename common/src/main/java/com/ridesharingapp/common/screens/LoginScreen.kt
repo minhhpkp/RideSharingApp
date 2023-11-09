@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.components.ButtonComponent
 import com.ridesharingapp.common.components.DividerTextComponent
-import com.ridesharingapp.common.components.ErrorText
 import com.ridesharingapp.common.components.HeadingTextComponent
 import com.ridesharingapp.common.components.NormalTextComponent
 import com.ridesharingapp.common.components.PasswordTextFieldComponent
@@ -56,11 +55,9 @@ fun <Screen> LoginScreen(loginViewModel: LoginViewModel<Screen>) {
                         loginViewModel.onEvent(LoginUIEvent.EmailChanged(it))
                     },
                     errorStatus = loginViewModel.loginUIState.emailErrorStatus.value,
-                    isEmail = true
+                    isEmail = true,
+                    errorMessage = stringResource(R.string.incorrect_email_format)
                 )
-                if (loginViewModel.loginUIState.emailErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(id = R.string.incorrect_email_format))
-                }
 
                 PasswordTextFieldComponent(
                     labelValue = stringResource(id = R.string.password),
@@ -70,12 +67,14 @@ fun <Screen> LoginScreen(loginViewModel: LoginViewModel<Screen>) {
                     },
                     errorStatus = loginViewModel.loginUIState.passwordErrorStatus.value
                 )
-                if (loginViewModel.loginUIState.passwordErrorStatus.value) {
-                    ErrorText(errorMessage = stringResource(id = R.string.password_format_error_message))
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                UnderlinedClickableText(value = stringResource(id = R.string.forgot_password))
+                UnderlinedClickableText(
+                    value = stringResource(id = R.string.forgot_password),
+                    onClick = {
+                        loginViewModel.onEvent(LoginUIEvent.ForgotPasswordTextClicked)
+                    }
+                )
 
                 Column(
                     modifier = Modifier.fillMaxSize(),

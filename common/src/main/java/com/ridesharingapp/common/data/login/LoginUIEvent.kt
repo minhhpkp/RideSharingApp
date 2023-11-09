@@ -6,4 +6,5 @@ sealed class LoginUIEvent {
     object LoginButtonClicked : LoginUIEvent()
     object SignUpTextClicked : LoginUIEvent()
     object BackButtonClicked : LoginUIEvent()
+    object ForgotPasswordTextClicked : LoginUIEvent()
 }
