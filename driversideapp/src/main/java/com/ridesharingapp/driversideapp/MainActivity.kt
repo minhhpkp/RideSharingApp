@@ -20,7 +20,6 @@ import com.ridesharingapp.driversideapp.navigation.Screen
 import com.ridesharingapp.driversideapp.screens.HomeScreen
 
 val appRouter = AppRouter<Screen>(Screen.SignUpScreen)
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,13 +53,15 @@ fun RideSharingApp() {
                 }
                 is Screen.LoginScreen -> {
                     LoginScreen(
-                        loginViewModel = DriverSideLoginViewModel(appRouter), 
-                        appRouter = appRouter, 
+                        loginViewModel = DriverSideLoginViewModel(appRouter),
+                        appRouter = appRouter,
                         signUpScreen = Screen.SignUpScreen
                     )
                 }
                 is Screen.HomeScreen -> {
-                    HomeScreen(homeViewModel = HomeViewModel(appRouter))
+                    HomeScreen(
+                        homeViewModel = HomeViewModel(appRouter)
+                    )
                 }
             }
         }

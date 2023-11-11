@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Driver Side App</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="MAPS_API_KEY">AIzaSyBWMW0a-X8Mjdh5tmmsFfyspSrwwfvgXbg</string>
+    <!--    driver side string by Nam-->
+    <string name="passenger_location">Địa chỉ khách hàng</string>
+    <string name="cancel">Đóng</string>
 </resources>
