@@ -1,11 +1,11 @@
 package com.ridesharingapp.common.data.login
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-
 data class LoginUIState(
-    var email: String = "",
-    var password: String = "",
-    val emailErrorStatus: MutableState<Boolean> = mutableStateOf(false),
-    val passwordErrorStatus: MutableState<Boolean> = mutableStateOf(false)
+    var email: String? = null,
+    var password: String? = null,
+    var emailErrorStatus: Boolean = true,
+    var passwordErrorStatus: Boolean = true,
+
+    var loginInProgress: Boolean = false,
+    var loginFailed: Boolean = false
 )
