@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Driver Side App</string>
+    <string name="license_plate">License Plate</string>
+    <string name="incorrect_license_plate_format">Incorrect license plate format.</string>
+    <string name="vehicle_type">Vehicle Type</string>
+    <string name="incorrect_vehicle_name_format">Incorrect vehicle name format.</string>
 </resources>

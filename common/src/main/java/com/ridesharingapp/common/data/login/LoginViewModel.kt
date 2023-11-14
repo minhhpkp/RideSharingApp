@@ -1,88 +1,104 @@
 package com.ridesharingapp.common.data.login
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.ridesharingapp.common.data.rules.Validator
-import com.ridesharingapp.common.navigation.AppRouter
+import com.ridesharingapp.common.navigation.Screen
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-class LoginViewModel<Screen>(
-    private val appRouter: AppRouter<Screen>,
-    private val signUpScreen: Screen,
+open class LoginViewModel(
+    private val navController: NavHostController,
     private val authSuccessScreen: Screen,
     private val forgotPasswordScreen: Screen,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val signUpScreen: Screen,
+    private val isFromSignUpScreen: Boolean,
+    private val startScreen: Screen,
+    initEmail: String? = null
 ) : ViewModel() {
-    val loginUIState by mutableStateOf(LoginUIState())
-    private var allValidationPassed by mutableStateOf(false)
-    private var loginInProgress by mutableStateOf(false)
-    private var loginFailed by mutableStateOf(false)
+    private val _uiState = MutableStateFlow(
+        LoginUIState(
+            email = initEmail,
+            emailErrorStatus = initEmail?.let { !Validator.validateEmail(it).status } ?: true
+        )
+    )
+    val uiState: StateFlow<LoginUIState> = _uiState.asStateFlow()
+    init {
+        println("LoginViewModel created")
+    }
 
-    fun onEvent(event: LoginUIEvent) {
+    open fun onEvent(event: LoginUIEvent) {
         when(event) {
             is LoginUIEvent.EmailChanged -> {
-                loginUIState.email = event.email
-                val emailValidationResult = Validator.validateEmail(event.email)
-                loginUIState.emailErrorStatus.value = !emailValidationResult.status
+                _uiState.update {
+                    it.copy(
+                        email = event.email,
+                        emailErrorStatus = !Validator.validateEmail(event.email).status
+                    )
+                }
             }
             is LoginUIEvent.PasswordChanged -> {
-                loginUIState.password = event.password
-                val passwordValidationResult = Validator.validatePassword(event.password)
-                loginUIState.passwordErrorStatus.value = !passwordValidationResult.status
+                _uiState.update {
+                    it.copy(
+                        password = event.password,
+                        passwordErrorStatus = !Validator.validatePassword(event.password).status
+                    )
+                }
             }
             is LoginUIEvent.LoginButtonClicked -> {
-                onEvent(LoginUIEvent.EmailChanged(loginUIState.email))
-                onEvent(LoginUIEvent.PasswordChanged(loginUIState.password))
-                if (allValidationPassed) onLoginButtonClick()
+                if (allValidationPassed(_uiState.value)) onLoginButtonClick()
             }
             is LoginUIEvent.SignUpTextClicked -> {
-                appRouter.navigateTo(signUpScreen)
-            }
-            is LoginUIEvent.BackButtonClicked -> {
-                appRouter.navigateTo(signUpScreen)
+                if (isFromSignUpScreen) {
+                    navController.popBackStack()
+                } else {
+                    navController.navigate(signUpScreen.withArgs("true"))
+                }
             }
             is LoginUIEvent.ForgotPasswordTextClicked -> {
-                appRouter.navigateTo(forgotPasswordScreen)
+                navController.navigate(forgotPasswordScreen.route)
+            }
+            is LoginUIEvent.LoginFailedChanged -> {
+                _uiState.update { it.copy(loginFailed = event.loginFailed) }
+            }
+            is LoginUIEvent.LoginInProgressChanged -> {
+                _uiState.update { it.copy(loginInProgress = event.loginInProgress) }
             }
         }
-        allValidationPassed = !loginUIState.emailErrorStatus.value
-            && !loginUIState.passwordErrorStatus.value
-    }
-
-    fun isAllValidationPassed(): Boolean {
-        return allValidationPassed
-    }
-
-    fun isLoginInProgress(): Boolean {
-        return loginInProgress
-    }
-
-    fun isLoginFailed(): Boolean {
-        return loginFailed
-    }
-
-    fun dismissFailureMessage() {
-        loginFailed = false
     }
 
     private fun onLoginButtonClick() {
-        loginInProgress = true
+        onEvent(LoginUIEvent.LoginInProgressChanged(true))
         auth.signInWithEmailAndPassword(
-                loginUIState.email,
-                loginUIState.password
+                _uiState.value.email!!,
+                _uiState.value.password!!
             )
-            .addOnCompleteListener{
-                loginInProgress = false
-                if (it.isSuccessful) {
+            .addOnCompleteListener{ task ->
+                onEvent(LoginUIEvent.LoginInProgressChanged(false))
+                if (task.isSuccessful) {
                     Log.d("Login", "signInWithEmail:success")
-                    appRouter.navigateTo(authSuccessScreen)
+                    navController.popBackStack(
+                        route = startScreen.route,
+                        inclusive = true
+                    )
+                    navController.navigate(authSuccessScreen.route)
                 } else {
-                    Log.w("Login", "signInWithEmail:failure", it.exception)
-                    loginFailed = true
+                    Log.w("Login", "signInWithEmail:failure", task.exception)
+                    onEvent(LoginUIEvent.LoginFailedChanged(true))
                 }
             }
+    }
+
+    fun dismissFailureMessage() {
+        _uiState.update { it.copy(loginFailed = false) }
+    }
+
+    fun allValidationPassed(uiState: LoginUIState): Boolean {
+        return !uiState.emailErrorStatus && !uiState.passwordErrorStatus
     }
 }

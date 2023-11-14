@@ -13,6 +13,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,12 +28,12 @@ import com.ridesharingapp.common.components.HeadingTextComponent
 import com.ridesharingapp.common.components.TextFieldComponent
 import com.ridesharingapp.common.data.forgotpassword.ForgotPasswordUIEvent
 import com.ridesharingapp.common.data.forgotpassword.ForgotPasswordViewModel
-import com.ridesharingapp.common.navigation.SystemBackButtonHandler
 
 @Composable
-fun <Screen> ForgotPasswordScreen(
-    forgotPasswordViewModel: ForgotPasswordViewModel<Screen>
+fun ForgotPasswordScreen(
+    forgotPasswordViewModel: ForgotPasswordViewModel
 ) {
+    val uiState by forgotPasswordViewModel.uiState.collectAsState()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -42,7 +44,11 @@ fun <Screen> ForgotPasswordScreen(
                 .background(Color.White)
                 .padding(28.dp)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
                 HeadingTextComponent(value = "Reset your password here")
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -52,8 +58,9 @@ fun <Screen> ForgotPasswordScreen(
                     onTextChange = {
                         forgotPasswordViewModel.onEvent(ForgotPasswordUIEvent.EmailChanged(it))
                     },
-                    errorStatus = forgotPasswordViewModel.showEmailFieldError(),
+                    errorStatus = if (uiState.email == null) false else uiState.emailErrorStatus,
                     isEmail = true,
+                    textValue = uiState.email?:"",
                     errorMessage = stringResource(R.string.incorrect_email_format)
                 )
 
@@ -64,17 +71,17 @@ fun <Screen> ForgotPasswordScreen(
                     onClickAction = {
                         forgotPasswordViewModel.onEvent(ForgotPasswordUIEvent.SendButtonClicked)
                     },
-                    isEnabled = forgotPasswordViewModel.sendEnabled()
+                    isEnabled = !uiState.emailErrorStatus
                 )
             }
         }
 
-        if (forgotPasswordViewModel.isSendingInProgress()) {
+        if (uiState.sendingInProgress) {
             CircularProgressIndicator()
         }
     }
 
-    if (forgotPasswordViewModel.showAlert()) {
+    if (uiState.sendingResult != -1) {
         AlertDialog(
             onDismissRequest = { forgotPasswordViewModel.dismissAlert() },
             confirmButton = {
@@ -84,16 +91,12 @@ fun <Screen> ForgotPasswordScreen(
             },
             title = {
                 Text(
-                    text = if (forgotPasswordViewModel.getSendingResultStringID() == R.string.reset_email_sent_successfully)
+                    text = if (uiState.sendingResult == R.string.reset_email_sent_successfully)
                         "Success" else "Failed"
                 )
             },
-            text = { Text(text = stringResource(forgotPasswordViewModel.getSendingResultStringID())) }
+            text = { Text(text = stringResource(uiState.sendingResult)) }
         )
-    }
-
-    SystemBackButtonHandler {
-        forgotPasswordViewModel.onEvent(ForgotPasswordUIEvent.BackButtonClicked)
     }
 }
 
@@ -118,6 +121,7 @@ fun ForgotPasswordScreenPreview() {
                 },
                 errorStatus = false,
                 isEmail = true,
+                textValue = "",
                 errorMessage = stringResource(R.string.incorrect_email_format)
             )
 

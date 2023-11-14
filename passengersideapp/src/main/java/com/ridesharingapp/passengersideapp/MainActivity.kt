@@ -1,131 +1,68 @@
 package com.ridesharingapp.passengersideapp
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.ridesharingapp.common.data.forgotpassword.ForgotPasswordViewModel
-import com.ridesharingapp.common.data.login.LoginViewModel
-import com.ridesharingapp.common.data.registration.RegistrationViewModel
-import com.ridesharingapp.common.navigation.AppRouter
-import com.ridesharingapp.common.screens.ForgotPasswordScreen
-import com.ridesharingapp.common.screens.LoginScreen
-import com.ridesharingapp.common.screens.SignUpScreen
-import com.ridesharingapp.common.screens.TermsAndConditionsScreen
-import com.ridesharingapp.passengersideapp.data.home.HomeViewModel
-import com.ridesharingapp.passengersideapp.navigation.Screen
-import com.ridesharingapp.passengersideapp.screens.HomeScreen
-
-val appRouter = AppRouter<Screen>(Screen.SignUpScreen)
+import com.google.firebase.firestore.firestore
+import com.ridesharingapp.passengersideapp.navigation.ScreenNavigation
 
 class MainActivity : ComponentActivity() {
-    private lateinit var auth: FirebaseAuth
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        auth = FirebaseAuth.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val db = Firebase.firestore
 
         setContent {
-            ScreenNavigation(auth = auth)
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        val currentUser = FirebaseAuth.getInstance().currentUser
-
-        if (currentUser != null) {
-            currentUser.email?.let { Log.d("MainActivity.onStart", it) }
-            appRouter.navigateTo(Screen.HomeScreen)
-        }
-    }
-}
-
-@Composable
-fun ScreenNavigation(auth: FirebaseAuth) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
-    ) {
-        Crossfade(targetState = appRouter.currentScreen, label = "") {
-            when (it.value) {
-                is Screen.SignUpScreen -> {
-                    SignUpScreen(
-                        registrationViewModel = viewModel<RegistrationViewModel<Screen>>(
-                            factory = object : ViewModelProvider.Factory {
-                                @Suppress("UNCHECKED_CAST")
-                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return RegistrationViewModel(
-                                        appRouter = appRouter,
-                                        termsAndConditionScreen = Screen.TermsAndConditionsScreen,
-                                        loginScreen = Screen.LoginScreen,
-                                        authSuccessScreen = Screen.HomeScreen,
-                                        auth = auth
-                                    ) as T
-                                }
+            var loading by rememberSaveable {
+                mutableStateOf(true)
+            }
+            rememberSaveable {
+                if (auth.currentUser != null) {
+                    println("${auth.currentUser!!.uid} ${auth.currentUser!!.email}")
+                    db.collection("Users")
+                        .document(auth.currentUser!!.uid)
+                        .get().addOnSuccessListener { doc ->
+                            println("MainAct: get user doc successfully")
+                            val roles = doc.get("Roles")!! as Long
+                            println("MainAct: roles = $roles")
+                            // attempt to login with unauthorized roles
+                            if (roles != 0L && roles != 2L) {
+                                auth.signOut()
+                                if (auth.currentUser != null) throw Exception("Cleanup unsuccessfully")
                             }
-                        )
-                    )
+                            loading = false
+                        }
+                        .addOnFailureListener{
+                            println("MainAct: failed to get user doc")
+                            auth.signOut()
+                            loading = false
+                        }
+                } else {
+                    loading = false
                 }
-                is Screen.TermsAndConditionsScreen -> {
-                    TermsAndConditionsScreen(
-                        appRouter = appRouter,
-                        signUpScreen = Screen.SignUpScreen
-                    )
+                0
+            }
+            if (loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-                is Screen.LoginScreen -> {
-                    LoginScreen(
-                        loginViewModel = viewModel<LoginViewModel<Screen>>(
-                            factory = object : ViewModelProvider.Factory {
-                                @Suppress("UNCHECKED_CAST")
-                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return LoginViewModel(
-                                        appRouter = appRouter,
-                                        signUpScreen = Screen.SignUpScreen,
-                                        authSuccessScreen = Screen.HomeScreen,
-                                        auth = auth,
-                                        forgotPasswordScreen = Screen.ForgotPasswordScreen
-                                    ) as T
-                                }
-                            }
-                        )
-                    )
-                }
-                is Screen.ForgotPasswordScreen -> {
-                    ForgotPasswordScreen(
-                        forgotPasswordViewModel = viewModel<ForgotPasswordViewModel<Screen>>(
-                            factory = object : ViewModelProvider.Factory {
-                                @Suppress("UNCHECKED_CAST")
-                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return ForgotPasswordViewModel(auth, appRouter, Screen.LoginScreen) as T
-                                }
-                            }
-                        )
-                    )
-                }
-                is Screen.HomeScreen -> {
-                    HomeScreen(
-                        homeViewModel = viewModel(
-                            factory = object : ViewModelProvider.Factory {
-                                @Suppress("UNCHECKED_CAST")
-                                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                    return HomeViewModel(appRouter) as T
-                                }
-                            }
-                        )
-                    )
-                }
+            } else {
+                ScreenNavigation(auth = auth, db = db)
             }
         }
     }

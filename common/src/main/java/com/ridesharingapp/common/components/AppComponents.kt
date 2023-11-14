@@ -28,7 +28,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,7 +84,8 @@ fun HeadingTextComponent(value: String, modifier: Modifier = Modifier) {
     Text(
         text = value,
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .background(Color.White),
         style = TextStyle(
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
@@ -101,13 +102,11 @@ fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
+    textValue: String,
     errorMessage: String = "",
     errorStatus: Boolean = false,
     isEmail: Boolean = false
 ) {
-    var textValue by remember {
-        mutableStateOf("")
-    }
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -125,7 +124,6 @@ fun TextFieldComponent(
             imeAction = ImeAction.Next
         ),
         onValueChange = {
-            textValue = it
             onTextChange(it)
         },
         leadingIcon = {
@@ -149,13 +147,11 @@ fun PasswordTextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
+    password: String,
     errorStatus: Boolean
 ) {
     val localFocusManager = LocalFocusManager.current
-    var password by remember {
-        mutableStateOf("")
-    }
-    var passwordVisible by remember {
+    var passwordVisible by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -180,7 +176,6 @@ fun PasswordTextFieldComponent(
         },
         singleLine = true,
         onValueChange = {
-            password = it
             onTextChange(it)
         },
         leadingIcon = {
@@ -227,7 +222,7 @@ fun CheckboxComponent(label: @Composable () -> Unit, onCheckedChange: (Boolean) 
             .heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var checked by remember {
+        var checked by rememberSaveable {
             mutableStateOf(false)
         }
         Checkbox(
@@ -283,7 +278,7 @@ fun TermsAndConditionsText(onTextClickAction: (String) -> Unit) {
 }
 
 @Composable
-fun ButtonComponent(labelValue: String, onClickAction: () -> Unit, isEnabled: Boolean = false) {
+fun ButtonComponent(labelValue: String, onClickAction: () -> Unit, isEnabled: Boolean = true) {
     Button(
         onClick = onClickAction,
         modifier = Modifier

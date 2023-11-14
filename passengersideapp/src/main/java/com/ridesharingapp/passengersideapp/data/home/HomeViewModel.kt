@@ -4,11 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.ridesharingapp.common.navigation.AppRouter
 import com.ridesharingapp.passengersideapp.navigation.Screen
 
-class HomeViewModel(private val appRouter: AppRouter<Screen>) : ViewModel() {
+class HomeViewModel(private val navController: NavHostController) : ViewModel() {
     var signOutInProgress by mutableStateOf(false)
 
     fun signOut() {
@@ -20,7 +20,11 @@ class HomeViewModel(private val appRouter: AppRouter<Screen>) : ViewModel() {
         firebaseAuth.addAuthStateListener{
             if (it.currentUser == null) {
                 signOutInProgress = false
-                appRouter.navigateTo(Screen.LoginScreen)
+                navController.popBackStack(
+                    route = Screen.HomeScreen.route,
+                    inclusive = true
+                )
+                navController.navigate(Screen.WelcomeScreen.route)
             }
         }
     }
