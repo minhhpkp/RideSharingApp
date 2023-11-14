@@ -13,7 +13,6 @@ import com.ridesharingapp.common.navigation.AppRouter
 import com.ridesharingapp.common.screens.LoginScreen
 import com.ridesharingapp.common.screens.SignUpScreen
 import com.ridesharingapp.common.screens.TermsAndConditionsScreen
-import com.ridesharingapp.driversideapp.data.home.HomeViewModel
 import com.ridesharingapp.driversideapp.data.login.DriverSideLoginViewModel
 import com.ridesharingapp.driversideapp.data.registration.DriverSideRegistrationViewModel
 import com.ridesharingapp.driversideapp.navigation.Screen
