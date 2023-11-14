@@ -2,11 +2,22 @@
     <string name="app_name">Driver Side App</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="MAPS_API_KEY">AIzaSyBWMW0a-X8Mjdh5tmmsFfyspSrwwfvgXbg</string>
-    <!--    driver side string by Nam-->
-    <string name="passenger_location">Địa chỉ khách hàng</string>
-    <string name="cancel">Đóng</string>
+
     <string name="license_plate">License Plate</string>
     <string name="incorrect_license_plate_format">Incorrect license plate format.</string>
     <string name="vehicle_type">Vehicle Type</string>
     <string name="incorrect_vehicle_name_format">Incorrect vehicle name format.</string>
+    <!--    driver side string by Nam-->
+    <string name="passenger_location">Địa chỉ hành khách</string>
+    <string name="cancel_ride">Hủy chuyến</string>
+    <string name="cancel">Cancel</string>
+    <string name="grablam"> GrabLam </string>
+    <string name="passenger_requests">Danh sách yêu cầu hành khách </string>
+    <string name="no_passengers">Hiện tại không có hành khách gần mình</string>
+    <string name="reload">Tải lại danh sách</string>
+    <string name="arrived_at_destination">Đến điểm đón khách!</string>
+    <string name="pick_up_passenger">Đón khách thành công!</string>
+    <string name="return_to_dashboard">Trở về trang chủ</string>
+    <string name="ride_completed">Đến đích thành công!</string>
+    <string name="contact_passenger">Liên lạc với hành khách</string>
 </resources>
