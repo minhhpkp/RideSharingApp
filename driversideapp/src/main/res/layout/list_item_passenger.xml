@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@android:color/white"
+    android:id="@+id/listItemLayout">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:id="@+id/avatar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:src="@drawable/user"
+        android:layout_margin="16dp"
+        />
+
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Nam"
+        android:textSize="25sp"
+        android:textColor="@android:color/black"
+        android:layout_marginHorizontal="16dp"
+        android:includeFontPadding="false"
+        app:layout_constraintTop_toTopOf="@+id/avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/avatar"
+        />
+
+    <TextView
+        android:id="@+id/passengerDistance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Hành khách cách đây 2.5km"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        android:layout_marginHorizontal="16dp"
+        android:includeFontPadding="false"
+        app:layout_constraintTop_toBottomOf="@+id/username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/avatar"
+        />
+
+    <TextView
+        android:id="@+id/tripCost"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Thông tin thanh toán: 25.000đ"
+        android:textSize="12sp"
+        android:textColor="@color/color_light_grey"
+        android:layout_marginHorizontal="16dp"
+        android:includeFontPadding="false"
+        app:layout_constraintTop_toBottomOf="@+id/passengerDistance"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/avatar"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/bottomDiv"
+        android:layout_marginHorizontal="16dp"
+        android:background="@android:color/black"
+        android:alpha="0.12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:backgroundTint="@color/color_red"
+        android:includeFontPadding="false"
+        android:text="@string/cancel_ride"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf = "parent"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
