@@ -3,66 +3,67 @@ package com.ridesharingapp.driversideapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.ridesharingapp.common.navigation.AppRouter
-import com.ridesharingapp.common.screens.LoginScreen
-import com.ridesharingapp.common.screens.SignUpScreen
-import com.ridesharingapp.common.screens.TermsAndConditionsScreen
-import com.ridesharingapp.driversideapp.data.home.HomeViewModel
-import com.ridesharingapp.driversideapp.data.login.DriverSideLoginViewModel
-import com.ridesharingapp.driversideapp.data.registration.DriverSideRegistrationViewModel
-import com.ridesharingapp.driversideapp.navigation.Screen
-import com.ridesharingapp.driversideapp.screens.HomeScreen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.ridesharingapp.driversideapp.navigation.ScreenNavigation
 
-val appRouter = AppRouter<Screen>(Screen.SignUpScreen)
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            RideSharingApp()
-        }
-    }
-}
 
-@Composable
-fun RideSharingApp() {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White
-    ) {
-        Crossfade(targetState = appRouter.currentScreen, label = "") {
-            when (it.value) {
-                is Screen.SignUpScreen -> {
-                    SignUpScreen(
-                        registrationViewModel = DriverSideRegistrationViewModel(appRouter),
-                        appRouter = appRouter,
-                        termsAndConditionsScreen = Screen.TermsAndConditionsScreen,
-                        loginScreen = Screen.LoginScreen
-                    )
+        val auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
+
+        setContent {
+            var loading by rememberSaveable {
+                mutableStateOf(true)
+            }
+            rememberSaveable {
+                if (auth.currentUser != null) {
+                    println("${auth.currentUser!!.uid} ${auth.currentUser!!.email}")
+                    db.collection("Users")
+                        .document(auth.currentUser!!.uid)
+                        .get().addOnSuccessListener { doc ->
+                            println("MainAct: get user doc successfully")
+                            val roles = doc.get("Roles")!! as Long
+                            println("MainAct: roles = $roles")
+                            // attempt to login with unauthorized roles
+                            if (roles != 1L && roles != 2L) {
+                                auth.signOut()
+                                if (auth.currentUser != null) throw Exception("Cleanup unsuccessfully")
+                            }
+                            loading = false
+                        }
+                        .addOnFailureListener{
+                            println("MainAct: failed to get user doc")
+                            auth.signOut()
+                            loading = false
+                        }
+                } else {
+                    loading = false
                 }
-                is Screen.TermsAndConditionsScreen -> {
-                    TermsAndConditionsScreen(
-                        appRouter = appRouter,
-                        signUpScreen = Screen.SignUpScreen
-                    )
+                0
+            }
+
+            if (loading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-                is Screen.LoginScreen -> {
-                    LoginScreen(
-                        loginViewModel = DriverSideLoginViewModel(appRouter),
-                        appRouter = appRouter,
-                        signUpScreen = Screen.SignUpScreen
-                    )
-                }
-                is Screen.HomeScreen -> {
-                    HomeScreen(
-                        homeViewModel = HomeViewModel(appRouter)
-                    )
-                }
+            } else {
+                ScreenNavigation(auth = auth, db = db)
             }
         }
     }

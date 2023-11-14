@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -22,11 +23,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +84,8 @@ fun HeadingTextComponent(value: String, modifier: Modifier = Modifier) {
     Text(
         text = value,
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .background(Color.White),
         style = TextStyle(
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
@@ -99,11 +102,11 @@ fun TextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
-    errorStatus: Boolean
+    textValue: String,
+    errorMessage: String = "",
+    errorStatus: Boolean = false,
+    isEmail: Boolean = false
 ) {
-    var textValue by remember {
-        mutableStateOf("")
-    }
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -116,9 +119,11 @@ fun TextFieldComponent(
             focusedLabelColor = Primary,
             cursorColor = Primary,
         ),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (isEmail) KeyboardType.Email else KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
         onValueChange = {
-            textValue = it
             onTextChange(it)
         },
         leadingIcon = {
@@ -130,6 +135,10 @@ fun TextFieldComponent(
         singleLine = true,
         isError = errorStatus
     )
+
+    if (errorStatus) {
+        ErrorText(errorMessage = errorMessage)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,13 +147,11 @@ fun PasswordTextFieldComponent(
     labelValue: String,
     painterResource: Painter,
     onTextChange: (String) -> Unit,
+    password: String,
     errorStatus: Boolean
 ) {
     val localFocusManager = LocalFocusManager.current
-    var password by remember {
-        mutableStateOf("")
-    }
-    var passwordVisible by remember {
+    var passwordVisible by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -169,7 +176,6 @@ fun PasswordTextFieldComponent(
         },
         singleLine = true,
         onValueChange = {
-            password = it
             onTextChange(it)
         },
         leadingIcon = {
@@ -202,6 +208,10 @@ fun PasswordTextFieldComponent(
         else PasswordVisualTransformation(),
         isError = errorStatus
     )
+
+    if (errorStatus) {
+        ErrorText(errorMessage = stringResource(id = R.string.password_format_error_message))
+    }
 }
 
 @Composable
@@ -212,7 +222,7 @@ fun CheckboxComponent(label: @Composable () -> Unit, onCheckedChange: (Boolean) 
             .heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var checked by remember {
+        var checked by rememberSaveable {
             mutableStateOf(false)
         }
         Checkbox(
@@ -268,7 +278,7 @@ fun TermsAndConditionsText(onTextClickAction: (String) -> Unit) {
 }
 
 @Composable
-fun ButtonComponent(labelValue: String, onClickAction: () -> Unit, isEnabled: Boolean = false) {
+fun ButtonComponent(labelValue: String, onClickAction: () -> Unit, isEnabled: Boolean = true) {
     Button(
         onClick = onClickAction,
         modifier = Modifier
@@ -369,7 +379,7 @@ fun RegisterLoginRoutingText(tryingToLogin: Boolean, onTextClickAction: (String)
 }
 
 @Composable
-fun UnderlinedClickableText(value: String) {
+fun UnderlinedClickableText(value: String, onClick: () -> Unit) {
     ClickableText(
         modifier = Modifier
             .fillMaxWidth()
@@ -385,6 +395,32 @@ fun UnderlinedClickableText(value: String) {
         text = AnnotatedString(
             text = value
         ),
-        onClick = {}
+        onClick = { onClick() }
+    )
+}
+
+@Composable
+fun ErrorText(errorMessage: String) {
+    Text(
+        text = errorMessage,
+        color = Color.Red,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun UserAuthenticationFailedAlertDialog(
+    message: String = stringResource(R.string.incorrect_email_or_password_please_try_again),
+    dismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { dismiss() },
+        confirmButton = {
+            TextButton(onClick = { dismiss() }) {
+                Text(text = "OK")
+            }
+        },
+        title = { Text(text = "Error")},
+        text = { Text(text = message) }
     )
 }

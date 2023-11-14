@@ -5,4 +5,8 @@
     <!--    driver side string by Nam-->
     <string name="passenger_location">Địa chỉ khách hàng</string>
     <string name="cancel">Đóng</string>
+    <string name="license_plate">License Plate</string>
+    <string name="incorrect_license_plate_format">Incorrect license plate format.</string>
+    <string name="vehicle_type">Vehicle Type</string>
+    <string name="incorrect_vehicle_name_format">Incorrect vehicle name format.</string>
 </resources>

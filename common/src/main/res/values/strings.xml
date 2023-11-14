@@ -15,5 +15,14 @@
     <string name="welcome">Welcome</string>
     <string name="forgot_password">Forgot your password?</string>
     <string name="terms_header">Terms of Use</string>
-
+    <string name="name_format_error_message">Name must start by a capitalized character and consist of at least 2 characters.</string>
+    <string name="incorrect_email_format">Incorrect email format.</string>
+    <string name="password_format_error_message">Password must consist of at least 8 characters.</string>
+    <string name="incorrect_email_or_password_please_try_again">Incorrect email or password. Please try again.</string>
+    <string name="email_already_in_use">The email address is already in use by another account. Please try using another email to sign up.</string>
+    <string name="failed_to_sign_up_please_try_again">Failed to sign up. Please try again.</string>
+    <string name="reset_email_sent_successfully">An email with a link to reset your password is sent.</string>
+    <string name="failed_to_send_reset_email">An error has occurred. Please try again.</string>
+    <string name="update_role_failed">Roles update failed.</string>
+    <string name="update_role_success">Roles updated successfully.</string>
 </resources>
