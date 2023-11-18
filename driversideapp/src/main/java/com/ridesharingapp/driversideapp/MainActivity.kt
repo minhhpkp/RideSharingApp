@@ -1,70 +1,89 @@
 package com.ridesharingapp.driversideapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.ridesharingapp.driversideapp.navigation.ScreenNavigation
+import androidx.appcompat.app.AppCompatActivity
+import com.ridesharingapp.driversideapp.databinding.ActivityMainBinding
+import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
+import com.ridesharingapp.driversideapp.navigation.LoginKey
+import com.zhuinden.simplestack.History
+import com.zhuinden.simplestack.SimpleStateChanger
+import com.zhuinden.simplestack.StateChange
+import com.zhuinden.simplestack.navigator.Navigator
+import com.zhuinden.simplestackextensions.fragments.DefaultFragmentStateChanger
+import com.zhuinden.simplestackextensions.navigatorktx.backstack
+import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 
-class MainActivity : ComponentActivity() {
-
+class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
+    private lateinit var fragmentStateChanger: DefaultFragmentStateChanger
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val auth = FirebaseAuth.getInstance()
-        val db = FirebaseFirestore.getInstance()
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        setContent {
-            var loading by rememberSaveable {
-                mutableStateOf(true)
-            }
-            rememberSaveable {
-                if (auth.currentUser != null) {
-                    println("${auth.currentUser!!.uid} ${auth.currentUser!!.email}")
-                    db.collection("Users")
-                        .document(auth.currentUser!!.uid)
-                        .get().addOnSuccessListener { doc ->
-                            println("MainAct: get user doc successfully")
-                            val roles = doc.get("Roles")!! as Long
-                            println("MainAct: roles = $roles")
-                            // attempt to login with unauthorized roles
-                            if (roles != 1L && roles != 2L) {
-                                auth.signOut()
-                                if (auth.currentUser != null) throw Exception("Cleanup unsuccessfully")
-                            }
-                            loading = false
-                        }
-                        .addOnFailureListener{
-                            println("MainAct: failed to get user doc")
-                            auth.signOut()
-                            loading = false
-                        }
-                } else {
-                    loading = false
-                }
-                0
-            }
+        fragmentStateChanger = DefaultFragmentStateChanger(supportFragmentManager, R.id.container)
 
-            if (loading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                ScreenNavigation(auth = auth, db = db)
-            }
+        Navigator.configure()
+            .setStateChanger(SimpleStateChanger(this))
+            .install(this, binding.container, History.single(DriverHomeKey()))
+    }
+    override fun onBackPressed() {
+        if (!backstack.goBack()) {
+            super.onBackPressed()
         }
     }
+
+    override fun onNavigationEvent(stateChange: StateChange) {
+        fragmentStateChanger.handleStateChange(stateChange)
+    }
 }
+
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//        val auth = FirebaseAuth.getInstance()
+//        val db = FirebaseFirestore.getInstance()
+//
+//        setContent {
+//            var loading by rememberSaveable {
+//                mutableStateOf(true)
+//            }
+//            rememberSaveable {
+//                if (auth.currentUser != null) {
+//                    println("${auth.currentUser!!.uid} ${auth.currentUser!!.email}")
+//                    db.collection("Users")
+//                        .document(auth.currentUser!!.uid)
+//                        .get().addOnSuccessListener { doc ->
+//                            println("MainAct: get user doc successfully")
+//                            val roles = doc.get("Roles")!! as Long
+//                            println("MainAct: roles = $roles")
+//                            // attempt to login with unauthorized roles
+//                            if (roles != 1L && roles != 2L) {
+//                                auth.signOut()
+//                                if (auth.currentUser != null) throw Exception("Cleanup unsuccessfully")
+//                            }
+//                            loading = false
+//                        }
+//                        .addOnFailureListener{
+//                            println("MainAct: failed to get user doc")
+//                            auth.signOut()
+//                            loading = false
+//                        }
+//                } else {
+//                    loading = false
+//                }
+//                0
+//            }
+//
+//            if (loading) {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    CircularProgressIndicator()
+//                }
+//            } else {
+//                ScreenNavigation(auth = auth, db = db)
+//            }
+//        }
+//    }

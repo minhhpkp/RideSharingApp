@@ -25,4 +25,16 @@
     <string name="failed_to_send_reset_email">An error has occurred. Please try again.</string>
     <string name="update_role_failed">Roles update failed.</string>
     <string name="update_role_success">Roles updated successfully.</string>
+
+<!--    update-->
+    <string name="generic_error">An error has occurred.</string>
+    <string name="service_error">Unable to connect to service.</string>
+    <string name="permissions_required_to_use_this_app">Location permission is required.</string>
+    <string name="invalid_credentails">Invalid credentials.</string>
+    <string name="an_account_already_exists">An account already exists with this number.</string>
+    <string name="update_successful">Update successful.</string>
+    <string name="system_settings_are_preventing_location_updates">System settings are preventing location updates</string>
+    <string name="location_must_be_enabled">This app requires device location to be accessible during rides.</string>
+    <string name="unable_to_retrieve_coordinates_address">Unable to retrieve coordinates for selected address.</string>
+    <string name="unable_to_retrieve_coordinates_user">Unable to retrieve coordinates for your device.</string>
 </resources>

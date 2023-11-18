@@ -1,4 +1,4 @@
-package com.ridesharingapp.driversideapp.screens
+package com.ridesharingapp.driversideapp.data.login
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

@@ -1,22 +1,26 @@
 package com.ridesharingapp.driversideapp
 
 import android.app.Application
+import com.google.android.gms.maps.MapsInitializer
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.maps.GeoApiContext
+import com.ridesharingapp.driversideapp.data.services.RideService
+import com.zhuinden.simplestack.GlobalServices
 
 class RideSharingApp : Application() {
-    var updateRolesInProgress: Boolean = false
-    var updateRolesSuccess: Boolean = false
+    lateinit var globalServices: GlobalServices
+    lateinit var geoContext: GeoApiContext
+
     override fun onCreate() {
         super.onCreate()
-        FirebaseApp.initializeApp(this)
-    }
+        MapsInitializer.initialize(this)
+        geoContext = GeoApiContext.Builder()
+            .apiKey(BuildConfig.MAPS_API_KEY)
+            .build()
 
-    override fun onTerminate() {
-        super.onTerminate()
-        println("App on terminate $updateRolesInProgress $updateRolesSuccess")
-        if (updateRolesInProgress && !updateRolesSuccess) {
-            FirebaseAuth.getInstance().signOut()
-        }
+
+        globalServices = GlobalServices.builder()
+            .build()
     }
 }

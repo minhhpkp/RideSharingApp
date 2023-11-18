@@ -4,7 +4,6 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -59,6 +58,13 @@ dependencies {
     val navVersion = "2.7.5"
     val lifecycleVersion = "2.6.2"
 
+    implementation("com.github.Zhuinden:simple-stack:2.8.0")
+    implementation("com.github.Zhuinden:simple-stack-extensions:2.3.3")
+
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.8.0")
@@ -103,6 +109,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-database")
 
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
