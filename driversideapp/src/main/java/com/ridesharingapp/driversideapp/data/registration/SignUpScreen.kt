@@ -1,4 +1,4 @@
-package com.ridesharingapp.driversideapp.screens
+package com.ridesharingapp.driversideapp.data.registration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

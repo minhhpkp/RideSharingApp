@@ -2,9 +2,11 @@ package com.ridesharingapp.driversideapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.ridesharingapp.driversideapp.data.registration.SignUpScreen
 import com.ridesharingapp.driversideapp.databinding.ActivityMainBinding
 import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
 import com.ridesharingapp.driversideapp.navigation.LoginKey
+import com.ridesharingapp.driversideapp.navigation.SignUpKey
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange

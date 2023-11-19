@@ -11,6 +11,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class DriverHomeKey(private val noArgsPlaceholder: String = "") : DefaultFragmentKey() {
-    override fun instantiateFragment(): Fragment = HomeFragment.newInstance()
+    override fun instantiateFragment(): Fragment = HomeFragment()
 
 }

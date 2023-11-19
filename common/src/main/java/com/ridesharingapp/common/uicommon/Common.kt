@@ -8,11 +8,38 @@ import androidx.fragment.app.Fragment
 import com.ridesharingapp.common.R
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-
+import java.io.Serializable
 fun <T1, T2> combineTuple(f1: Flow<T1>, f2: Flow<T2>): Flow<Pair<T1, T2>> = combine(f1, f2) { t1, t2 -> Pair(t1, t2) }
 
-fun <T1, T2, T3> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>): Flow<Triple<T1, T2, T3>> = combine(f1, f2, f3) { t1, t2, t3 -> Triple<T1, T2, T3>(t1, t2, t3) }
+fun <T1, T2, T3, T4> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>, f4: Flow<T4>): Flow<Tuple4<T1, T2, T3, T4>> = combine(f1, f2, f3, f4) { t1, t2, t3, t4 -> Tuple4<T1, T2, T3, T4>(t1, t2, t3, t4) }
 
+fun <T1, T2, T3, T4, T5> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>, f4: Flow<T4>, f5: Flow<T5>): Flow<Tuple5<T1, T2, T3, T4, T5>> = combine(f1, f2, f3, f4, f5) { t1, t2, t3, t4, t5 -> Tuple5<T1, T2, T3, T4, T5>(t1, t2, t3, t4, t5) }
+
+data class Tuple4<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+) : Serializable {
+    override fun toString(): String {
+        return "Tuple4[$first, $second, $third, $fourth]"
+    }
+}
+
+data class Tuple5<A, B, C, D, E>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D,
+    val fifth: E
+) : Serializable {
+    override fun toString(): String {
+        return "Tuple5[$first, $second, $third, $fourth, $fifth]"
+    }
+}
+
+//This value is picked somewhat arbitrarily; it's just a unique identifier
+internal const val LOCATION_PERMISSION = 1000
 //How frequently do we want to request the location in milliseconds (10s here)
 internal const val LOCATION_REQUEST_INTERVAL = 10000L
 

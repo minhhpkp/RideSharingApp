@@ -17,47 +17,27 @@ import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.StateChange
 
-class HomeViewModel : ViewModel() {
-    // TODO: Implement the ViewModel
-}
 
-//class HomeViewModel(
-//    val backstack: Backstack,
-//    val rideService: RideService
-//    ) : ViewModel() {
-//    var signOutInProgress by mutableStateOf(false)
-//    private val _driverModel = MutableStateFlow<GrabLamUser?>(null)
-//    private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
-//    private val _mapIsReady = MutableStateFlow(false)
-//
-//    fun signOut() {
-//        signOutInProgress = true
-//        val firebaseAuth = FirebaseAuth.getInstance()
-//
-//        firebaseAuth.signOut()
-//
-////        firebaseAuth.addAuthStateListener{
-////            if (it.currentUser == null) {
-////                signOutInProgress = false
-////                navController.popBackStack(
-////                    route = Screen.HomeScreen.route,
-////                    inclusive = true
-////                )
-////                navController.navigate(Screen.WelcomeScreen.route)
-////            }
-////        }
-//    }
-//
-//    private fun sendToLogin() {
-//
-//    }
-//
-//    fun mapIsReady() {
-//        _mapIsReady.value = true
-//    }
-//
-//    fun handleError() {
-//        sendToLogin()
-//    }
-//}
+class HomeViewModel(
+    val backstack: Backstack,
+    val rideService: RideService
+    ) : ViewModel() {
+    var signOutInProgress by mutableStateOf(false)
+    private val _driverModel = MutableStateFlow<GrabLamUser?>(null)
+    private val _rideModel = MutableStateFlow<Ride?>(null)
+    private val _mapIsReady = MutableStateFlow(false)
+
+
+    private fun sendToLogin() {
+
+    }
+
+    fun mapIsReady() {
+        _mapIsReady.value = true
+    }
+
+    fun handleError() {
+        sendToLogin()
+    }
+}
 
