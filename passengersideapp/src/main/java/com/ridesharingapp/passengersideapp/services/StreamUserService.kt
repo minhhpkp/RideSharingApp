@@ -53,7 +53,7 @@ class StreamUserService(
                         type = type ?: ""
                     )
                 )
-            } else if (currentUser != null && currentUser.id != userId){
+            } else if (currentUser != null){
                 val streamUser = User(
                     id = userId
                 )
@@ -183,13 +183,12 @@ class StreamUserService(
         }
     }
 
-    override suspend fun logOutUser(user: AppUser) =
+    override suspend fun logOutUser() =
         withContext(Dispatchers.IO) {
             val result = client.disconnect(flushPersistence = true).await()
             if (result.isError) Log.d(
                 "LOG_USER_OUT",
                 result.error().message ?: "Error logging out"
             )
-            Unit
         }
 }

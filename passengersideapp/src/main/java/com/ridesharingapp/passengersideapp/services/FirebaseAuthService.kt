@@ -1,5 +1,6 @@
 package com.ridesharingapp.passengersideapp.services
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -19,7 +20,10 @@ class FirebaseAuthService(
         password: String
     ): ServiceResult<SignUpResult> = withContext(Dispatchers.IO) {
         try {
-            val authAttempt = auth.createUserWithEmailAndPassword(email, password).await()
+            val authAttempt = auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
+                if (!it.isSuccessful)
+                    Log.w("FirebaseAuthService", "createUserWithEmailAndPassword failed", it.exception)
+            }.await()
             if (authAttempt.user != null) ServiceResult.Value(
                 SignUpResult.Success(authAttempt.user!!.uid)
             )
@@ -39,7 +43,10 @@ class FirebaseAuthService(
         password: String
     ): ServiceResult<LogInResult> = withContext(Dispatchers.IO) {
         try {
-            val authAttempt = auth.signInWithEmailAndPassword(email, password).await()
+            val authAttempt = auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
+                if (!it.isSuccessful)
+                    Log.w("FirebaseAuthService", "SignInWithEmailAndPassword failed", it.exception)
+            }.await()
             if (authAttempt.user != null) ServiceResult.Value(
                 LogInResult.Success(
                     AppUser(
@@ -47,7 +54,9 @@ class FirebaseAuthService(
                     )
                 )
             )
-            else ServiceResult.Failure(Exception("Null user"))
+            else {
+                ServiceResult.Failure(Exception("Null user"))
+            }
         } catch (exception: Exception) {
             when (exception) {
                 is FirebaseAuthInvalidUserException -> ServiceResult.Value(LogInResult.InvalidCredentials)
@@ -57,7 +66,7 @@ class FirebaseAuthService(
         }
     }
 
-    override suspend fun logout(): ServiceResult<Unit> {
+    override fun logout(): ServiceResult<Unit> {
         auth.signOut()
         return ServiceResult.Value(Unit)
     }

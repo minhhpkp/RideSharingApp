@@ -1,5 +1,6 @@
 package com.ridesharingapp.passengersideapp.usecases
 
+import android.util.Log
 import com.ridesharingapp.passengersideapp.ServiceResult
 import com.ridesharingapp.passengersideapp.domain.AppUser
 import com.ridesharingapp.passengersideapp.services.AuthenticationService
@@ -36,7 +37,7 @@ class SignUpUser(
     ).let { updateResult ->
         when (updateResult) {
             is ServiceResult.Failure -> {
-                println("updateUserDetails ${updateResult.exception}")
+                Log.w("SignUpUser", "updateUserDetails failed", updateResult.exception)
                 ServiceResult.Failure(updateResult.exception)
             }
             is ServiceResult.Value -> ServiceResult.Value(SignUpResult.Success(uid))

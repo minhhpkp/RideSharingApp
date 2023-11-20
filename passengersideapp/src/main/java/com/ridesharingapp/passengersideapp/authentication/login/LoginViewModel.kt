@@ -1,12 +1,13 @@
 package com.ridesharingapp.passengersideapp.authentication.login
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.ridesharingapp.passengersideapp.ServiceResult
-import com.ridesharingapp.passengersideapp.domain.AppUser
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
 import com.ridesharingapp.passengersideapp.navigation.SignUpKey
+import com.ridesharingapp.passengersideapp.services.FirebaseAuthService
 import com.ridesharingapp.passengersideapp.services.LogInResult
 import com.ridesharingapp.passengersideapp.uicommon.ToastMessages
 import com.ridesharingapp.passengersideapp.usecases.LogInUser
@@ -14,6 +15,7 @@ import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
 import com.zhuinden.simplestack.StateChange
+import io.getstream.chat.android.client.ChatClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,7 +24,9 @@ import kotlin.coroutines.CoroutineContext
 
 class LoginViewModel(
     private val backstack: Backstack,
-    private val login: LogInUser
+    private val login: LogInUser,
+    private val authService: FirebaseAuthService,
+    private val client: ChatClient
 ) : ScopedServices.Activated, CoroutineScope {
     internal var toastHandler: ((ToastMessages) -> Unit)? = null
 
@@ -40,21 +44,32 @@ class LoginViewModel(
         password = input
     }
 
+    var clearingPrevLogin by mutableStateOf(true)
+        private set
+
+    var loginInProcess by mutableStateOf(false)
+        private set
+
     fun handleLogin() = launch(Dispatchers.Main) {
+        loginInProcess = true
         val loginAttempt = login.login(email, password)
+        loginInProcess = false
         when (loginAttempt) {
-            is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            is ServiceResult.Failure -> {
+                Log.w("LoginViewModel", "login failed", loginAttempt.exception)
+                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            }
             is ServiceResult.Value -> {
                 val result = loginAttempt.value
                 when (result) {
-                    is LogInResult.Success -> sendToDashboard(result.user)
+                    is LogInResult.Success -> sendToDashboard()
                     LogInResult.InvalidCredentials -> toastHandler?.invoke(ToastMessages.INVALID_CREDENTIALS)
                 }
             }
         }
     }
 
-    private fun sendToDashboard(user: AppUser) {
+    private fun sendToDashboard() {
          backstack.setHistory(
             History.of(PassengerDashboardKey()),
             //Direction of navigation which is used for animation
@@ -66,7 +81,36 @@ class LoginViewModel(
         backstack.goTo(SignUpKey())
     }
 
-    override fun onServiceActive() = Unit
+    // Logout the current user (if exists)
+    override fun onServiceActive() {
+        Log.d("LoginViewModel", "onServiceActive")
+        clearingPrevLogin = true
+        val fireAuthUser = authService.auth.currentUser
+        if (fireAuthUser != null) {
+            Log.d("LoginViewModel", "onServiceActive:firebaseUser ${fireAuthUser.email}")
+            authService.logout()
+            val user = client.getCurrentUser()
+            if (user != null) {
+                Log.d("LoginViewModel", "onServiceActive:chatClientUser ${user.name}")
+                client.disconnect(flushPersistence = true).enqueue {
+                    clearingPrevLogin = false
+                    if (it.isError) {
+                        Log.w(
+                            "LoginViewModel",
+                            it.error().message ?: "Error logging out",
+                            it.error().cause
+                        )
+                    } else {
+                        Log.d("LoginViewModel", "clearing old user:disconnect chat client:success")
+                    }
+                }
+            } else {
+                clearingPrevLogin = false
+            }
+        } else {
+            clearingPrevLogin = false
+        }
+    }
 
     override fun onServiceInactive() {
         canceller.cancel()

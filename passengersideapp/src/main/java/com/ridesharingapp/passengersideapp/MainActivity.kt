@@ -3,7 +3,8 @@ package com.ridesharingapp.passengersideapp
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import com.ridesharingapp.passengersideapp.databinding.ActivityMainBinding
+import com.ridesharingapp.common.R
+import com.ridesharingapp.common.databinding.ActivityMainBinding
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger

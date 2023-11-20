@@ -1,5 +1,6 @@
 package com.ridesharingapp.passengersideapp.authentication.signup
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,7 +50,10 @@ class SignUpViewModel(
     fun handleSignUp() = launch(Dispatchers.Main) {
         val signupAttempt = signUp.signUpUser(email, password, name)
         when (signupAttempt) {
-            is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            is ServiceResult.Failure -> {
+                Log.w("SignUpViewModel", "sign up failed", signupAttempt.exception)
+                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            }
             is ServiceResult.Value -> {
                 when (signupAttempt.value) {
                     is SignUpResult.Success -> {

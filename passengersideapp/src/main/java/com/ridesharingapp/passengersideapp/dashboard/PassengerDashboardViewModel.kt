@@ -64,7 +64,10 @@ class PassengerDashboardViewModel(
         _rideModel,
         _mapIsReady
     ).map { (passenger, rideResult, isMapReady) ->
-        if (rideResult is ServiceResult.Failure) return@map PassengerDashboardUiState.Error
+        if (rideResult is ServiceResult.Failure) {
+            Log.e("PassengerDashboardViewModel", "uiState:map:rideResult is failure ${passenger?.email} $isMapReady", rideResult.exception)
+            return@map PassengerDashboardUiState.Error
+        }
 
         val ride = (rideResult as ServiceResult.Value).value
 
@@ -144,13 +147,16 @@ class PassengerDashboardViewModel(
         val getUser = getUser.getUser()
         when (getUser) {
             is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "getPassenger failed", getUser.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
             is ServiceResult.Value -> {
-                if (getUser.value == null) sendToLogin()
+                if (getUser.value == null) {
+                    Log.e("PassengerDashboardViewModel", "getPassenger null user")
+                    sendToLogin()
+                }
                 else getActiveRideIfItExists(getUser.value)
-
             }
         }
     }
@@ -160,6 +166,7 @@ class PassengerDashboardViewModel(
 
         when (result) {
             is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "getActiveRideIfItExists failed", result.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
@@ -187,7 +194,10 @@ class PassengerDashboardViewModel(
         val getCoordinates = googleService.getPlaceCoordinates(selectedPlace.prediction.placeId)
 
         when (getCoordinates) {
-            is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "handleSearchItemClick:getCoordinates failed", getCoordinates.exception)
+                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            }
             is ServiceResult.Value -> {
                 if (getCoordinates.value != null &&
                     getCoordinates.value.place.latLng != null
@@ -211,7 +221,10 @@ class PassengerDashboardViewModel(
         )
 
         when (result) {
-            is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            is ServiceResult.Failure -> {
+                Log.w("PassengerDashboardViewModel", "attempToCreateNewRide failed", result.exception)
+                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            }
             is ServiceResult.Value -> {
                 _autoCompleteList.value = emptyList()
                 observeRideModel(result.value, _passengerModel.value!!)
@@ -223,6 +236,7 @@ class PassengerDashboardViewModel(
         val autocompleteRequest = googleService.getAutocompleteResults(query)
         when (autocompleteRequest) {
             is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "requestAutocompleteResults failed", autocompleteRequest.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
             is ServiceResult.Value -> {
@@ -240,6 +254,7 @@ class PassengerDashboardViewModel(
         val cancelRide = rideService.cancelRide()
         when (cancelRide) {
             is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "cancelRide failed", cancelRide.exception)
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
                 sendToSplash()
             }
@@ -288,8 +303,11 @@ class PassengerDashboardViewModel(
             )
 
             if (result is ServiceResult.Failure) {
+                Log.e("PassengerDashboardViewModel", "updatePassengerLocation", result.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
+        } else {
+            Log.e("PassengerDashboardViewModel", "updatePassengerLocation:currentRide is null")
         }
     }
 
@@ -298,7 +316,7 @@ class PassengerDashboardViewModel(
 
         if (currentRide is ServiceResult.Value && currentRide.value != null) {
             backstack.setHistory(
-                History.of(ChatKey()),
+                History.of(ChatKey(currentRide.value.rideId)),
                 StateChange.FORWARD
             )
         }

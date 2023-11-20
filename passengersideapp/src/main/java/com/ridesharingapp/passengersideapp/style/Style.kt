@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
-import com.ridesharingapp.passengersideapp.R
+import com.ridesharingapp.common.R
 
 val color_primary = Color(0xFF00BCD4)
 val color_black = Color(0xFF000000)

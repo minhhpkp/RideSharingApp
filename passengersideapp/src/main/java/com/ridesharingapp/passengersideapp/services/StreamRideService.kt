@@ -59,7 +59,14 @@ class StreamRideService(
                 cid = rideId
             )
 
-            val result = channelClient.addMembers(listOf(client.getCurrentUser()?.id ?: "")).await()
+            val currentUser = client.getCurrentUser()
+            val currentID = if (currentUser == null) {
+                Log.e("StreamRideService", "observeRideById:currentUser null")
+                ""
+            } else {
+                currentUser.id
+            }
+            val result = channelClient.addMembers(listOf(currentID)).await()
 
             if (result.isSuccess) {
                 observeChannelEvents(channelClient)
@@ -77,6 +84,7 @@ class StreamRideService(
                 result.onErrorSuspend {
                     _rideModelUpdates.emit(
                         result.error().let {
+                            Log.w("StreamRideService", "observeRideById:observeChannelEvents failed", it.cause)
                             ServiceResult.Failure(Exception(it.cause))
                         }
                     )
@@ -85,6 +93,7 @@ class StreamRideService(
             } else {
                 _rideModelUpdates.emit(
                     result.error().let {
+                        Log.w("StreamRideService", "observeRideById:addMembers failed", it.cause)
                         ServiceResult.Failure(Exception(it.cause))
                     }
                 )
@@ -92,7 +101,7 @@ class StreamRideService(
         }
     }
 
-    private suspend fun observeChannelEvents(channelClient: ChannelClient) {
+    private fun observeChannelEvents(channelClient: ChannelClient) {
         channelClient.subscribe { event: ChatEvent ->
             when (event) {
                 is ChannelDeletedEvent -> {
@@ -108,11 +117,11 @@ class StreamRideService(
                     val currentRideModel = _rideModelUpdates.value
 
                     if (currentRideModel is ServiceResult.Value && currentRideModel.value != null) {
-                        val channelClient = client.channel(
+                        val newChannelClient = client.channel(
                             cid = event.cid
                         )
 
-                        channelClient.create(emptyList(), mutableMapOf()).enqueue { result ->
+                        newChannelClient.create(emptyList(), mutableMapOf()).enqueue { result ->
                             if (result.isSuccess) {
                                 val lastMessageAt = result.data().lastMessageAt
                                 val hasMessage = if (lastMessageAt == null) 0 else 1
@@ -121,6 +130,8 @@ class StreamRideService(
                                         totalMessages = hasMessage
                                     )
                                 )
+                            } else {
+                                Log.w("observeChannelEvents", "NewMessageEvent:create failed", result.error().cause)
                             }
                         }
                     }
@@ -293,6 +304,7 @@ class StreamRideService(
         if (result.isSuccess) {
             ServiceResult.Value(result.data().cid)
         } else {
+            Log.w("StreamRideService", "failed to create ride", result.error().cause)
             ServiceResult.Failure(Exception(result.error().cause))
         }
     }

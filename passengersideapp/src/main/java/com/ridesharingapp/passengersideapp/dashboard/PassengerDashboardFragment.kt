@@ -320,7 +320,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
         ) {
             Toast.makeText(
                 requireContext(),
-                com.ridesharingapp.common.R.string.permissions_required_to_use_this_app,
+                R.string.permissions_required_to_use_this_app,
                 Toast.LENGTH_LONG
             ).show()
             viewModel.handleError()
@@ -396,16 +396,16 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
                                 route.legs.first().let { leg ->
                                     binding.distance.text = buildString {
-                                        append(getString(com.ridesharingapp.common.R.string.driver_is))
+                                        append(getString(R.string.driver_is))
                                         append(leg.distance.humanReadable)
-                                        append(getString(com.ridesharingapp.common.R.string.away))
+                                        append(getString(R.string.away))
                                     }
                                 }
                             }
                         } else {
                             Toast.makeText(
                                 requireContext(),
-                                com.ridesharingapp.common.R.string.unable_to_get_map_directions,
+                                R.string.unable_to_get_map_directions,
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -480,16 +480,16 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
                                 route.legs.first().let { leg ->
                                     binding.distance.text = buildString {
-                                        append(getString(com.ridesharingapp.common.R.string.destination_is))
+                                        append(getString(R.string.destination_is))
                                         append(leg.distance.humanReadable)
-                                        append(getString(com.ridesharingapp.common.R.string.away))
+                                        append(getString(R.string.away))
                                     }
                                 }
                             }
                         } else {
                             Toast.makeText(
                                 requireContext(),
-                                com.ridesharingapp.common.R.string.unable_to_get_map_directions,
+                                R.string.unable_to_get_map_directions,
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -605,8 +605,6 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                     val lon = location.longitude
 
                     viewModel.updatePassengerLocation(com.google.maps.model.LatLng(lat, lon))
-
-
                 } else {
 
                     Log.d("PLACES", locationRequest.exception.toString())

@@ -10,5 +10,5 @@ interface UserService {
 
     suspend fun initializeNewUser(user: AppUser): ServiceResult<AppUser?>
 
-    suspend fun logOutUser(user: AppUser): Unit
+    suspend fun logOutUser()
 }

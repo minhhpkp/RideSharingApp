@@ -10,7 +10,7 @@ interface AuthenticationService {
     suspend fun signUp(email: String, password: String): ServiceResult<SignUpResult>
     suspend fun login(email: String, password: String): ServiceResult<LogInResult>
 
-    suspend fun logout(): ServiceResult<Unit>
+    fun logout(): ServiceResult<Unit>
 
     /**
      * @return true if a user session is active, else null
