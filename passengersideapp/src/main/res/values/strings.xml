@@ -1,4 +1,18 @@
 <resources>
     <string name="app_name">Ride Sharing App</string>
     <string name="role_update_success">You have already had a driver account associated with this email address. Now, you also have access to passenger services with this account.</string>
+    <string name="need_a_ride">Need a ride?</string>
+
+    <string name="generic_error">An error has occurred.</string>
+    <string name="service_error">Unable to connect to service.</string>
+    <string name="permissions_required_to_use_this_app">Location permission is required.</string>
+    <string name="invalid_credentails">Invalid credentials.</string>
+    <string name="an_account_already_exists">An account already exists with this number.</string>
+    <string name="driver">Driver</string>
+    <string name="update_successful">Update successful.</string>
+    <string name="unable_to_retrieve_coordinates_address">Unable to retrieve coordinates for selected address.</string>
+    <string name="unable_to_retrieve_coordinates_user">Unable to retrieve coordinates for your device.</string>
+    <string name="string_continue">Continue</string>
+    <string name="back_button">Back button</string>
+
 </resources>

@@ -1,69 +1,56 @@
 package com.ridesharingapp.passengersideapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
-import com.ridesharingapp.passengersideapp.navigation.ScreenNavigation
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import com.ridesharingapp.passengersideapp.databinding.ActivityMainBinding
+import com.ridesharingapp.passengersideapp.navigation.SplashKey
+import com.zhuinden.simplestack.History
+import com.zhuinden.simplestack.SimpleStateChanger
+import com.zhuinden.simplestack.StateChange
+import com.zhuinden.simplestack.navigator.Navigator
+import com.zhuinden.simplestackextensions.fragments.DefaultFragmentStateChanger
+import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
+    private lateinit var fragmentStateChanger: DefaultFragmentStateChanger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val auth = FirebaseAuth.getInstance()
-        val db = Firebase.firestore
+        val binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        setContent {
-            var loading by rememberSaveable {
-                mutableStateOf(true)
-            }
-            rememberSaveable {
-                if (auth.currentUser != null) {
-                    println("${auth.currentUser!!.uid} ${auth.currentUser!!.email}")
-                    db.collection("Users")
-                        .document(auth.currentUser!!.uid)
-                        .get().addOnSuccessListener { doc ->
-                            println("MainAct: get user doc successfully")
-                            val roles = doc.get("Roles")!! as Long
-                            println("MainAct: roles = $roles")
-                            // attempt to login with unauthorized roles
-                            if (roles != 0L && roles != 2L) {
-                                auth.signOut()
-                                if (auth.currentUser != null) throw Exception("Cleanup unsuccessfully")
-                            }
-                            loading = false
-                        }
-                        .addOnFailureListener{
-                            println("MainAct: failed to get user doc")
-                            auth.signOut()
-                            loading = false
-                        }
-                } else {
-                    loading = false
-                }
-                0
-            }
-            if (loading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                ScreenNavigation(auth = auth, db = db)
+        onBackPressedDispatcher.addCallback(backPressedCallback) // this is required for `onBackPressedDispatcher` to work correctly
+
+        fragmentStateChanger = DefaultFragmentStateChanger(supportFragmentManager, R.id.container)
+
+        Navigator.configure()
+            .setStateChanger(SimpleStateChanger(this))
+            .setScopedServices(DefaultServiceProvider())
+            .setGlobalServices((application as RideSharingApp).globalServices)
+            .install(this, binding.container, History.single(SplashKey()))
+    }
+
+    private val backPressedCallback = object: OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (!Navigator.onBackPressed(this@MainActivity)) {
+                this.remove() // this is the only safe way to invoke onBackPressed while cancelling the execution of this callback
+                onBackPressed() // this is the only safe way to invoke onBackPressed while cancelling the execution of this callback
+                this@MainActivity.onBackPressedDispatcher.addCallback(this) // this is the only safe way to invoke onBackPressed while cancelling the execution of this callback
             }
         }
+    }
+
+    @Deprecated("Deprecated in Java",
+        ReplaceWith("super.onBackPressed()", "androidx.appcompat.app.AppCompatActivity")
+    )
+    @Suppress("RedundantModalityModifier")
+    final override fun onBackPressed() { // you cannot use `onBackPressed()` if you use `OnBackPressedDispatcher`
+        super.onBackPressed() // `OnBackPressedDispatcher` by Google effectively breaks all usages of `onBackPressed()` because they do not respect the original contract of `onBackPressed()`
+    }
+
+    override fun onNavigationEvent(stateChange: StateChange) {
+        fragmentStateChanger.handleStateChange(stateChange)
     }
 }
