@@ -7,6 +7,7 @@ import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackextensions.fragments.DefaultFragmentKey
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 import com.zhuinden.simplestackextensions.servicesktx.add
+import com.zhuinden.simplestackextensions.servicesktx.lookup
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -19,7 +20,7 @@ data class PassengerDashboardKey(private val noArgsPlaceholder: String = ""): De
         //How to create a scoped service
         override fun bindServices(serviceBinder: ServiceBinder) {
             with(serviceBinder) {
-                add(PassengerDashboardViewModel())
+                add(PassengerDashboardViewModel(backstack, lookup(), lookup(), lookup()))
             }
         }
 }

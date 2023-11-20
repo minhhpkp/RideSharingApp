@@ -7,28 +7,32 @@
     android:id="@+id/advanceRideStateLayout">
 
     <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/advanceButton"
-        android:layout_width="50dp"
-        android:layout_height="53dp"
-        android:layout_marginTop="4dp"
+        tools:src="@drawable/ic_pick_up_passenger"
+        android:layout_marginTop="8dp"
         android:background="@android:color/white"
         android:foreground="?attr/selectableItemBackgroundBorderless"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/confirm_arrived" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/poppins_regular"
         android:includeFontPadding="false"
-
-        android:text="@string/arrived_at_destination"
         android:textColor="@android:color/black"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toStartOf="@+id/advanceButton"
-        app:layout_constraintTop_toTopOf="@+id/advanceButton" />
+        android:textSize="22sp"
+        android:layout_margin="16dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/advanceButton"
+        android:text="@string/arrived_at_destination" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
