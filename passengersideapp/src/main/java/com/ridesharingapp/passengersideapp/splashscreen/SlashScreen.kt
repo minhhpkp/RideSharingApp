@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ridesharingapp.passengersideapp.style.color_primary
-import com.ridesharingapp.passengersideapp.style.color_white
-import com.ridesharingapp.passengersideapp.style.typography
+import com.ridesharingapp.common.style.color_primary
+import com.ridesharingapp.common.style.color_white
+import com.ridesharingapp.common.style.typography
 
 @Composable
 fun SplashScreen() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">GrabLam</string>
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
     <string name="go_to_login">"Already have an account?\ "</string>
@@ -89,4 +90,18 @@
     <string name="trip_is">"Trip is: "</string>
     <string name="from_passenger">" from passenger"</string>
     <string name="unable_to_retrieve_address">Unable to retrieve address</string>
+
+    <!--    driver side string by Nam-->
+<!--    <string name="passenger_location">Địa chỉ hành khách</string>-->
+    <string name="cancel_ride">Hủy chuyến</string>
+<!--    <string name="cancel">Cancel</string>-->
+    <string name="grablam"> GrabLam </string>
+<!--    <string name="passenger_requests">Danh sách yêu cầu hành khách </string>-->
+<!--    <string name="no_passengers">Hiện tại không có hành khách gần mình</string>-->
+    <string name="reload">Tải lại danh sách</string>
+<!--    <string name="arrived_at_destination">Đến điểm đón khách!</string>-->
+<!--    <string name="pick_up_passenger">Đón khách thành công!</string>-->
+<!--    <string name="return_to_dashboard">Trở về trang chủ</string>-->
+<!--    <string name="ride_completed">Đến đích thành công!</string>-->
+<!--    <string name="contact_passenger">Liên lạc với hành khách</string>-->
 </resources>

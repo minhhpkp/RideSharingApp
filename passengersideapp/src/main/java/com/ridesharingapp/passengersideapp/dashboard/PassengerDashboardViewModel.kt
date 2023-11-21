@@ -3,19 +3,16 @@ package com.ridesharingapp.passengersideapp.dashboard
 import android.util.Log
 import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.maps.model.LatLng
-import com.ridesharingapp.passengersideapp.ServiceResult
-import com.ridesharingapp.passengersideapp.domain.AppUser
-import com.ridesharingapp.passengersideapp.domain.Ride
-import com.ridesharingapp.passengersideapp.domain.RideStatus
-import com.ridesharingapp.passengersideapp.google.GoogleService
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.services.RideService
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.uicommon.combineTuple
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.passengersideapp.navigation.ChatKey
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
 import com.ridesharingapp.passengersideapp.navigation.ProfileSettingsKey
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
-import com.ridesharingapp.passengersideapp.services.RideService
-import com.ridesharingapp.passengersideapp.uicommon.ToastMessages
-import com.ridesharingapp.passengersideapp.uicommon.combineTuple
-import com.ridesharingapp.passengersideapp.usecases.GetUser
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -35,7 +32,7 @@ class PassengerDashboardViewModel(
     val backstack: Backstack,
     val getUser: GetUser,
     val rideService: RideService,
-    val googleService: GoogleService
+    val googleService: com.ridesharingapp.common.google.GoogleService
 ) : ScopedServices.Activated, CoroutineScope {
 
     private val canceller = Job()
@@ -45,8 +42,8 @@ class PassengerDashboardViewModel(
 
     internal var toastHandler: ((ToastMessages) -> Unit)? = null
 
-    private var _passengerModel = MutableStateFlow<AppUser?>(null)
-    private var _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
+    private var _passengerModel = MutableStateFlow<GrabLamUser?>(null)
+    private var _rideModel: Flow<ServiceResult<com.ridesharingapp.common.domain.Ride?>> = rideService.rideFlow()
     private val _mapIsReady = MutableStateFlow(false)
 
     /*
@@ -83,13 +80,13 @@ class PassengerDashboardViewModel(
                     ride.destinationAddress
                 )
 
-                ride.status == RideStatus.PASSENGER_PICK_UP.value
+                ride.status == com.ridesharingapp.common.domain.RideStatus.PASSENGER_PICK_UP.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.PassengerPickUp(
                     passengerLat = ride.passengerLatitude,
                     passengerLon = ride.passengerLongitude,
-                    driverLat = ride.driverLatitude,
-                    driverLon = ride.driverLongitude,
+                    driverLat = ride.driverLatitude!!,
+                    driverLon = ride.driverLongitude!!,
                     destinationLat = ride.destinationLatitude,
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
@@ -98,7 +95,7 @@ class PassengerDashboardViewModel(
                     totalMessages = ride.totalMessages
                 )
 
-                ride.status == RideStatus.EN_ROUTE.value
+                ride.status == com.ridesharingapp.common.domain.RideStatus.EN_ROUTE.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.EnRoute(
                     passengerLat = ride.passengerLatitude,
@@ -109,11 +106,11 @@ class PassengerDashboardViewModel(
                     destinationLon = ride.destinationLongitude,
                     driverAvatar = ride.driverAvatarUrl ?: "",
                     totalMessages = ride.totalMessages,
-                    driverLat = ride.driverLatitude,
-                    driverLon = ride.driverLongitude
+                    driverLat = ride.driverLatitude!!,
+                    driverLon = ride.driverLongitude!!
                 )
 
-                ride.status == RideStatus.ARRIVED.value
+                ride.status == com.ridesharingapp.common.domain.RideStatus.ARRIVED.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.Arrived(
                     passengerLat = ride.passengerLatitude,
@@ -156,12 +153,12 @@ class PassengerDashboardViewModel(
                     Log.e("PassengerDashboardViewModel", "getPassenger null user")
                     sendToLogin()
                 }
-                else getActiveRideIfItExists(getUser.value)
+                else getActiveRideIfItExists(getUser.value!!)
             }
         }
     }
 
-    private suspend fun getActiveRideIfItExists(user: AppUser) {
+    private suspend fun getActiveRideIfItExists(user: GrabLamUser) {
         val result = rideService.getRideIfInProgress()
 
         when (result) {
@@ -173,7 +170,7 @@ class PassengerDashboardViewModel(
             is ServiceResult.Value -> {
                 //if null, no active ride exists
                 if (result.value == null) _passengerModel.value = user
-                else observeRideModel(result.value, user)
+                else observeRideModel(result.value!!, user)
             }
         }
     }
@@ -184,7 +181,7 @@ class PassengerDashboardViewModel(
      * setting the other models first, we avoid the UI rapidly switching between different states
      * in a disorganized way.
      */
-    private suspend fun observeRideModel(rideId: String, user: AppUser) {
+    private suspend fun observeRideModel(rideId: String, user: GrabLamUser) {
         //The result of this call is handled inside the flowable assigned to _rideModel
         rideService.observeRideById(rideId)
         _passengerModel.value = user
@@ -200,9 +197,9 @@ class PassengerDashboardViewModel(
             }
             is ServiceResult.Value -> {
                 if (getCoordinates.value != null &&
-                    getCoordinates.value.place.latLng != null
+                    getCoordinates.value!!.place.latLng != null
                 ) {
-                    attemptToCreateNewRide(getCoordinates.value, selectedPlace.address)
+                    attemptToCreateNewRide(getCoordinates.value!!, selectedPlace.address)
                 } else toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_COORDINATES)
             }
         }
@@ -297,7 +294,7 @@ class PassengerDashboardViewModel(
 
         if (currentRide is ServiceResult.Value && currentRide.value != null) {
             val result = rideService.updatePassengerLocation(
-                currentRide.value,
+                currentRide.value!!,
                 latLng.lat,
                 latLng.lng
             )
@@ -316,7 +313,7 @@ class PassengerDashboardViewModel(
 
         if (currentRide is ServiceResult.Value && currentRide.value != null) {
             backstack.setHistory(
-                History.of(ChatKey(currentRide.value.rideId)),
+                History.of(ChatKey(currentRide.value!!.rideId)),
                 StateChange.FORWARD
             )
         }

@@ -47,12 +47,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ridesharingapp.common.R
-import com.ridesharingapp.passengersideapp.domain.AppUser
-import com.ridesharingapp.passengersideapp.domain.UserType
-import com.ridesharingapp.passengersideapp.style.color_black
-import com.ridesharingapp.passengersideapp.style.color_primary
-import com.ridesharingapp.passengersideapp.style.color_white
-import com.ridesharingapp.passengersideapp.style.typography
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.style.color_black
+import com.ridesharingapp.common.style.color_primary
+import com.ridesharingapp.common.style.color_white
+import com.ridesharingapp.common.style.typography
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
@@ -136,7 +135,7 @@ fun ProfileToolbar(
 fun ProfileHeader(
     modifier: Modifier,
     viewModel: ProfileSettingsViewModel,
-    user: AppUser?
+    user: GrabLamUser?
 ) {
 
     //Note: You would want to do better null checking than this in a prod app
@@ -158,7 +157,7 @@ fun ProfileHeader(
 fun ProfileAvatar(
     modifier: Modifier,
     viewModel: ProfileSettingsViewModel,
-    user: AppUser
+    user: GrabLamUser
 ) {
     Box(
         modifier = Modifier
@@ -207,7 +206,7 @@ fun ProfileAvatar(
 fun UserTypeState(
     modifier: Modifier,
     viewModel: ProfileSettingsViewModel,
-    user: AppUser?
+    user: GrabLamUser?
 ) {
     if (user != null) {
         Column(
@@ -218,7 +217,7 @@ fun UserTypeState(
                 modifier = Modifier
                     .wrapContentHeight(align = Alignment.Top)
                     .padding(top = 16.dp),
-                text = if (user.type != UserType.PASSENGER.value) stringResource(id = R.string.driver)
+                text = if (user.type != com.ridesharingapp.common.domain.UserType.PASSENGER.value) stringResource(id = R.string.driver)
                 else stringResource(id = R.string.passenger),
                 style = typography.h3
             )
@@ -228,7 +227,7 @@ fun UserTypeState(
                     .wrapContentSize()
                     .padding(bottom = 16.dp)
                     .scale(1.5f),
-                checked = user.type != UserType.PASSENGER.value,
+                checked = user.type != com.ridesharingapp.common.domain.UserType.PASSENGER.value,
                 onCheckedChange = { viewModel.handleToggleUserType() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = color_primary,

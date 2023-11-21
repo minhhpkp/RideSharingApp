@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.ridesharingapp.common.ToastMessages
-import com.ridesharingapp.passengersideapp.ServiceResult
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.services.SignUpResult
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.usecases.SignUpUser
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
-import com.ridesharingapp.passengersideapp.services.SignUpResult
-import com.ridesharingapp.passengersideapp.usecases.SignUpUser
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices

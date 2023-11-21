@@ -1,11 +1,11 @@
 package com.ridesharingapp.passengersideapp.splashscreen
 
 import android.util.Log
-import com.ridesharingapp.passengersideapp.ServiceResult
-import com.ridesharingapp.passengersideapp.domain.AppUser
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
-import com.ridesharingapp.passengersideapp.usecases.GetUser
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -38,12 +38,12 @@ class SplashViewModel(
             }
             is ServiceResult.Value -> {
                 if (getUser.value == null) sendToLogin()
-                else sendToDashboard(getUser.value)
+                else sendToDashboard(getUser.value!!)
             }
         }
     }
 
-    private fun sendToDashboard(user: AppUser) {
+    private fun sendToDashboard(user: GrabLamUser) {
         Log.d("VM_USER", user.toString())
 
         backstack.setHistory(

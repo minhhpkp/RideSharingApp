@@ -1,16 +1,16 @@
 package com.ridesharingapp.passengersideapp.profile.settings
 
 import android.net.Uri
-import com.ridesharingapp.passengersideapp.ServiceResult
-import com.ridesharingapp.passengersideapp.domain.AppUser
-import com.ridesharingapp.passengersideapp.domain.UserType
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.domain.UserType
+import com.ridesharingapp.common.services.UserService
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.usecases.GetUser
+import com.ridesharingapp.common.usecases.LogOutUser
+import com.ridesharingapp.common.usecases.UpdateUserAvatar
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
-import com.ridesharingapp.passengersideapp.services.UserService
-import com.ridesharingapp.passengersideapp.uicommon.ToastMessages
-import com.ridesharingapp.passengersideapp.usecases.GetUser
-import com.ridesharingapp.passengersideapp.usecases.LogOutUser
-import com.ridesharingapp.passengersideapp.usecases.UpdateUserAvatar
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -32,8 +32,8 @@ class ProfileSettingsViewModel(
 ) : ScopedServices.Activated, CoroutineScope {
     internal var toastHandler: ((ToastMessages) -> Unit)? = null
 
-    private val _userModel = MutableStateFlow<AppUser?>(null)
-    val userModel: StateFlow<AppUser?> get() = _userModel
+    private val _userModel = MutableStateFlow<GrabLamUser?>(null)
+    val userModel: StateFlow<GrabLamUser?> get() = _userModel
     fun handleLogOut() = launch(Dispatchers.Main) {
         logUserOut.logout()
         sendToLogin()
@@ -93,7 +93,7 @@ class ProfileSettingsViewModel(
         }
     }
 
-    private suspend fun updateUser(user: AppUser) {
+    private suspend fun updateUser(user: GrabLamUser) {
         val updateAttempt = userService.updateUser(user)
 
         when (updateAttempt) {

@@ -1,11 +1,11 @@
 package com.ridesharingapp.passengersideapp.chat
 
-import com.ridesharingapp.passengersideapp.ServiceResult
-import com.ridesharingapp.passengersideapp.domain.AppUser
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
-import com.ridesharingapp.passengersideapp.uicommon.ToastMessages
-import com.ridesharingapp.passengersideapp.usecases.GetUser
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -36,7 +36,7 @@ class ChatViewModel(
         }
     }
 
-    private fun sendToDashboard(user: AppUser) {
+    private fun sendToDashboard(user: GrabLamUser) {
         backstack.setHistory(
             History.of(PassengerDashboardKey()),
             //Direction of navigation which is used for animation

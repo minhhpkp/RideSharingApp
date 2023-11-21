@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -40,11 +41,11 @@ import com.google.maps.android.PolyUtil
 import com.google.maps.model.TravelMode
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.FragmentPassengerDashboardBinding
+import com.ridesharingapp.common.uicommon.LOCATION_REQUEST_INTERVAL
+import com.ridesharingapp.common.uicommon.handleToast
+import com.ridesharingapp.common.uicommon.hideKeyboard
 import com.ridesharingapp.passengersideapp.BuildConfig
 import com.ridesharingapp.passengersideapp.RideSharingApp
-import com.ridesharingapp.passengersideapp.uicommon.LOCATION_REQUEST_INTERVAL
-import com.ridesharingapp.passengersideapp.uicommon.handleToast
-import com.ridesharingapp.passengersideapp.uicommon.hideKeyboard
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -418,7 +419,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                         googleMap!!.addMarker(
                             MarkerOptions().apply {
                                 position(LatLng(uiState.driverLat, uiState.driverLon))
-                                val markerBitmap = requireContext().getDrawable(R.drawable.ic_car_marker)?.toBitmap()
+                                val markerBitmap = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_car_marker)?.toBitmap()
                                 markerBitmap?.let {
                                     icon(BitmapDescriptorFactory.fromBitmap(it))
                                 }
@@ -497,7 +498,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                         googleMap!!.addMarker(
                             MarkerOptions().apply {
                                 position(LatLng(uiState.driverLat, uiState.driverLon))
-                                val markerBitmap = requireContext().getDrawable(R.drawable.ic_car_marker)?.toBitmap()
+                                val markerBitmap = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_car_marker)?.toBitmap()
                                 markerBitmap?.let {
                                     icon(BitmapDescriptorFactory.fromBitmap(it))
                                 }
