@@ -14,8 +14,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:src="@drawable/user"
         android:layout_margin="16dp"
+        tools:src="@drawable/user"
         />
 
     <TextView
@@ -23,7 +23,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="Nam"
-        android:textSize="25sp"
+        android:textSize="28sp"
+        android:fontFamily="@font/poppins_semi_bold"
         android:textColor="@android:color/black"
         android:layout_marginHorizontal="16dp"
         android:includeFontPadding="false"
@@ -36,8 +37,9 @@
         android:id="@+id/passengerDistance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="Hành khách cách đây 2.5km"
+        tools:text="Passenger is 2.5km away"
         android:textSize="12sp"
+        android:fontFamily="@font/poppins_regular"
         android:textColor="@android:color/black"
         android:layout_marginHorizontal="16dp"
         android:includeFontPadding="false"
@@ -47,11 +49,12 @@
         />
 
     <TextView
-        android:id="@+id/tripCost"
+        android:id="@+id/tripDistance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="Thông tin thanh toán: 25.000đ"
+        tools:text="Passenger is 2.5km away"
         android:textSize="12sp"
+        android:fontFamily="@font/poppins_light"
         android:textColor="@color/color_light_grey"
         android:layout_marginHorizontal="16dp"
         android:includeFontPadding="false"
@@ -70,19 +73,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:backgroundTint="@color/color_red"
-        android:includeFontPadding="false"
-        android:text="@string/cancel_ride"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf = "parent"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

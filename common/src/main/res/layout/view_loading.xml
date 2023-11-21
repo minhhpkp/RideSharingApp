@@ -9,8 +9,8 @@
     android:gravity="center">
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/passengersLoadingProgressBar"
-        android:layout_width="98dp"
-        android:layout_height="98dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         app:indicatorColor="@color/color_primary" />
 
     <TextView
