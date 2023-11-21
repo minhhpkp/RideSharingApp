@@ -37,4 +37,5 @@
     <string name="location_must_be_enabled">This app requires device location to be accessible during rides.</string>
     <string name="unable_to_retrieve_coordinates_address">Unable to retrieve coordinates for selected address.</string>
     <string name="unable_to_retrieve_coordinates_user">Unable to retrieve coordinates for your device.</string>
+    <string name="grablam">GrabLam</string>
 </resources>

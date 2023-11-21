@@ -1,8 +1,8 @@
 package com.ridesharingapp.driversideapp.navigation
 
 import androidx.fragment.app.Fragment
-import com.ridesharingapp.driversideapp.data.home.HomeFragment
-import com.ridesharingapp.driversideapp.data.home.HomeViewModel
+import com.ridesharingapp.driversideapp.data.chat.ChatFragment
+import com.ridesharingapp.driversideapp.data.chat.ChatViewModel
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestackextensions.fragments.DefaultFragmentKey
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
@@ -11,17 +11,17 @@ import com.zhuinden.simplestackextensions.servicesktx.lookup
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class DriverHomeKey(private val noArgsPlaceholder: String = "") : DefaultFragmentKey() ,
+data class ChatKey(val channelId: String): DefaultFragmentKey(),
     DefaultServiceProvider.HasServices {
-    override fun instantiateFragment(): Fragment = HomeFragment()
+    override fun instantiateFragment(): Fragment = ChatFragment()
 
     override fun getScopeTag(): String = toString()
 
     //How to create a scoped service
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(HomeViewModel(backstack, lookup(), lookup()))
+            //add(SplashViewModel(lookup(), backstack))
+            add(ChatViewModel(backstack, lookup()))
         }
     }
-
 }
