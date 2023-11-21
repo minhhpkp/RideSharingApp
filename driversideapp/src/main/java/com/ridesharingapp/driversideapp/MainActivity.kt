@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.ActivityMainBinding
-import com.ridesharingapp.driversideapp.data.navigation.LoginKey
+import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange

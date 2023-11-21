@@ -55,7 +55,6 @@ class GoogleService(
             DirectionsApi.newRequest(geoApiContext)
                 .mode(TravelMode.DRIVING)
                 .units(Unit.METRIC)
-                //Change this appropriately
                 .region("vn")
                 .origin(
                     userLatLng
@@ -82,7 +81,6 @@ class GoogleService(
             if (token == null) token = AutocompleteSessionToken.newInstance()
 
             val request = FindAutocompletePredictionsRequest.builder()
-                //Obviously change this according to distribution of the app
                 .setCountries("VN")
                 .setTypesFilter(listOf(PlaceTypes.ADDRESS))
                 .setSessionToken(token)

@@ -37,6 +37,7 @@ import io.getstream.chat.android.client.utils.onSuccessSuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class StreamRideService(
@@ -101,10 +102,14 @@ class StreamRideService(
         }
     }
 
-    private fun observeChannelEvents(channelClient: ChannelClient) {
+    private suspend fun observeChannelEvents(channelClient: ChannelClient) =
+        withContext(Dispatchers.IO) {
         channelClient.subscribe { event: ChatEvent ->
             when (event) {
                 is ChannelDeletedEvent -> {
+                    this.launch {
+                        observeOpenRides()
+                    }
                     _rideModelUpdates.value = ServiceResult.Value(null)
                 }
 
@@ -338,19 +343,19 @@ class StreamRideService(
             else {
                 val channelClient = client.channel(result.data().first().cid)
 
-
                 if (channelClient.hide().await().isSuccess) {
                     val deleteResult = channelClient.delete().await()
-
+                    observeOpenRides()
                     if (deleteResult.isSuccess) {
                         _rideModelUpdates.emit(ServiceResult.Value(null))
                         ServiceResult.Value(Unit)
-                    } else ServiceResult.Failure(Exception(result.error().cause))
+                    } else {
+                        Log.e("StreamRideService", "cancelRide failed", deleteResult.error().cause)
+                        ServiceResult.Failure(Exception(deleteResult.error().cause))
+                    }
                 } else {
                     ServiceResult.Failure(Exception("Unable to hide channel"))
                 }
-
-
             }
         } else {
             ServiceResult.Failure(Exception(result.error().cause))
@@ -360,6 +365,7 @@ class StreamRideService(
     override suspend fun completeRide(ride: Ride): ServiceResult<Unit> {
         val channelClient = client.channel(ride.rideId)
         channelClient.delete().await()
+        observeOpenRides()
         return ServiceResult.Value(Unit)
     }
 

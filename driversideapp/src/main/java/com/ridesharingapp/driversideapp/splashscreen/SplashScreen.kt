@@ -1,4 +1,4 @@
-package com.ridesharingapp.passengersideapp.splashscreen
+package com.ridesharingapp.driversideapp.splashscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +18,7 @@ import com.ridesharingapp.common.style.color_primary
 import com.ridesharingapp.common.style.color_white
 import com.ridesharingapp.common.style.typography
 
+
 @Composable
 fun SplashScreen() {
     Column(
@@ -28,11 +29,11 @@ fun SplashScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.app_name),
+            text = stringResource(id = R.string.app_name),
             style = typography.h1.copy(color = color_white)
         )
         Text(
-            text = stringResource(R.string.need_a_ride),
+            text = stringResource(id = R.string.need_a_ride),
             style = typography.subtitle2.copy(color = color_white)
         )
         Spacer(modifier = Modifier.height(32.dp))
