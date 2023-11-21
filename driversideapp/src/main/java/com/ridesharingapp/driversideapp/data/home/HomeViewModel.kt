@@ -2,18 +2,18 @@ package com.ridesharingapp.driversideapp.data.home
 
 import android.util.Log
 import com.google.maps.model.LatLng
-import com.ridesharingapp.driversideapp.data.domain.Ride
-import com.ridesharingapp.driversideapp.data.domain.RideStatus
-import com.ridesharingapp.driversideapp.data.uicommon.ToastMessages
-import com.ridesharingapp.driversideapp.data.uicommon.combineTuple
-import com.ridesharingapp.driversideapp.ServiceResult
-import com.ridesharingapp.driversideapp.data.domain.GrabLamUser
-import com.ridesharingapp.driversideapp.data.services.RideService
-import com.ridesharingapp.driversideapp.data.usecase.GetUser
-import com.ridesharingapp.driversideapp.navigation.ChatKey
-import com.ridesharingapp.driversideapp.navigation.LoginKey
-import com.ridesharingapp.driversideapp.navigation.ProfileSettingsKey
-import com.ridesharingapp.driversideapp.navigation.SplashKey
+import com.ridesharingapp.common.domain.Ride
+import com.ridesharingapp.common.domain.RideStatus
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.uicommon.combineTuple
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.services.RideService
+import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.driversideapp.data.navigation.ChatKey
+import com.ridesharingapp.driversideapp.data.navigation.LoginKey
+import com.ridesharingapp.driversideapp.data.navigation.ProfileSettingsKey
+import com.ridesharingapp.driversideapp.data.navigation.SplashKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
@@ -69,8 +69,8 @@ class HomeViewModel(
                         && ride.driverLongitude != null -> HomeUiState.PassengerPickUp(
                     passengerLat = ride.passengerLatitude,
                     passengerLon = ride.passengerLongitude,
-                    driverLat = ride.driverLatitude,
-                    driverLon = ride.driverLongitude,
+                    driverLat = ride.driverLatitude!!,
+                    driverLon = ride.driverLongitude!!,
                     destinationLat = ride.destinationLatitude,
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
@@ -82,8 +82,8 @@ class HomeViewModel(
                 ride.status == RideStatus.EN_ROUTE.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> HomeUiState.EnRoute(
-                    driverLat = ride.driverLatitude,
-                    driverLon = ride.driverLongitude,
+                    driverLat = ride.driverLatitude!!,
+                    driverLon = ride.driverLongitude!!,
                     destinationLat = ride.destinationLatitude,
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
@@ -95,8 +95,8 @@ class HomeViewModel(
                 ride.status == RideStatus.ARRIVED.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> HomeUiState.Arrived(
-                    driverLat = ride.driverLatitude,
-                    driverLon = ride.driverLongitude,
+                    driverLat = ride.driverLatitude!!,
+                    driverLon = ride.driverLongitude!!,
                     destinationLat = ride.destinationLatitude,
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
@@ -150,7 +150,7 @@ class HomeViewModel(
             is ServiceResult.Value -> {
                 if (getUser.value == null) sendToLogin()
                 else {
-                    getActiveRideIfItExists(getUser.value)
+                    getActiveRideIfItExists(getUser.value!!)
                 }
             }
         }
@@ -174,7 +174,7 @@ class HomeViewModel(
                 if (result.value == null) {
                     _driverModel.value = user
                     getPassengerList()
-                } else observeRideModel(result.value, user)
+                } else observeRideModel(result.value!!, user)
             }
         }
     }

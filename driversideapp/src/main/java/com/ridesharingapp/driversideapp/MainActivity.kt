@@ -2,10 +2,10 @@ package com.ridesharingapp.driversideapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.ridesharingapp.driversideapp.databinding.ActivityMainBinding
-import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
-import com.ridesharingapp.driversideapp.navigation.LoginKey
-import com.ridesharingapp.driversideapp.navigation.SplashKey
+import com.ridesharingapp.common.databinding.ActivityMainBinding
+import com.ridesharingapp.driversideapp.data.navigation.DriverHomeKey
+import com.ridesharingapp.driversideapp.data.navigation.LoginKey
+import com.ridesharingapp.driversideapp.data.navigation.SplashKey
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
@@ -13,7 +13,7 @@ import com.zhuinden.simplestack.navigator.Navigator
 import com.zhuinden.simplestackextensions.fragments.DefaultFragmentStateChanger
 import com.zhuinden.simplestackextensions.navigatorktx.backstack
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
-
+import com.ridesharingapp.common.R
 class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
     private lateinit var fragmentStateChanger: DefaultFragmentStateChanger
     override fun onCreate(savedInstanceState: Bundle?) {

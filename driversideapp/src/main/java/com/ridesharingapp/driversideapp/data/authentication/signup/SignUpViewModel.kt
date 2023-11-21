@@ -3,11 +3,11 @@ package com.ridesharingapp.driversideapp.data.authentication.signup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.ridesharingapp.driversideapp.ServiceResult
-import com.ridesharingapp.driversideapp.data.services.SignUpResult
-import com.ridesharingapp.driversideapp.data.uicommon.ToastMessages
-import com.ridesharingapp.driversideapp.data.usecase.SignUpUser
-import com.ridesharingapp.driversideapp.navigation.SplashKey
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.services.SignUpResult
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.usecase.SignUpUser
+import com.ridesharingapp.driversideapp.data.navigation.SplashKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices

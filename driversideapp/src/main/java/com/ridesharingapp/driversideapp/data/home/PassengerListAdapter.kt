@@ -12,10 +12,10 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.maps.model.LatLng
-import com.ridesharingapp.driversideapp.data.domain.GrabLamUser
-import com.ridesharingapp.driversideapp.data.domain.Ride
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.domain.Ride
 import com.ridesharingapp.driversideapp.R
-import com.ridesharingapp.driversideapp.databinding.ListItemPassengerBinding
+import com.ridesharingapp.common.databinding.ListItemPassengerBinding
 
 class PassengerListAdapter :
     ListAdapter<Pair<Ride, LatLng>, PassengerListAdapter.PassengerViewHolder>(

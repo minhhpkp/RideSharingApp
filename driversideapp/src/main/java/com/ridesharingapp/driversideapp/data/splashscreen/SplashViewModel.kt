@@ -1,11 +1,11 @@
 package com.ridesharingapp.driversideapp.data.splashscreen
 
 import android.util.Log
-import com.ridesharingapp.driversideapp.ServiceResult
-import com.ridesharingapp.driversideapp.data.domain.GrabLamUser
-import com.ridesharingapp.driversideapp.data.usecase.GetUser
-import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
-import com.ridesharingapp.driversideapp.navigation.LoginKey
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.driversideapp.data.navigation.DriverHomeKey
+import com.ridesharingapp.driversideapp.data.navigation.LoginKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices

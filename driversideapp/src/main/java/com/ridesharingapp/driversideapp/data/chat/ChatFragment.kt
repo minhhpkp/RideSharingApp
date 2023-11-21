@@ -5,9 +5,9 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import com.getstream.sdk.chat.viewmodel.MessageInputViewModel
 import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel
-import com.ridesharingapp.driversideapp.R
-import com.ridesharingapp.driversideapp.databinding.FragmentChatBinding
-import com.ridesharingapp.driversideapp.navigation.ChatKey
+import com.ridesharingapp.common.R
+import com.ridesharingapp.common.databinding.FragmentChatBinding
+import com.ridesharingapp.driversideapp.data.navigation.ChatKey
 import com.zhuinden.simplestackextensions.fragments.KeyedFragment
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import io.getstream.chat.android.ui.message.input.viewmodel.bindView

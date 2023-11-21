@@ -1,11 +1,11 @@
 package com.ridesharingapp.driversideapp.data.chat
 
-import com.ridesharingapp.driversideapp.ServiceResult
-import com.ridesharingapp.driversideapp.data.domain.GrabLamUser
-import com.ridesharingapp.driversideapp.data.uicommon.ToastMessages
-import com.ridesharingapp.driversideapp.data.usecase.GetUser
-import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
-import com.ridesharingapp.driversideapp.navigation.SplashKey
+import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.uicommon.ToastMessages
+import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.driversideapp.data.navigation.DriverHomeKey
+import com.ridesharingapp.driversideapp.data.navigation.SplashKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices

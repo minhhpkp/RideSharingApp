@@ -42,12 +42,12 @@ import com.google.android.libraries.places.api.Places
 import com.google.maps.DirectionsApi
 import com.google.maps.android.PolyUtil
 import com.google.maps.model.TravelMode
-import com.ridesharingapp.driversideapp.data.uicommon.handleToast
+import com.ridesharingapp.common.uicommon.handleToast
 import com.ridesharingapp.driversideapp.BuildConfig
-import com.ridesharingapp.driversideapp.R
+import com.ridesharingapp.common.R
 import com.ridesharingapp.driversideapp.RideSharingApp
-import com.ridesharingapp.driversideapp.data.uicommon.LOCATION_REQUEST_INTERVAL
-import com.ridesharingapp.driversideapp.databinding.FragmentDriverHomeBinding
+import com.ridesharingapp.common.uicommon.LOCATION_REQUEST_INTERVAL
+import com.ridesharingapp.common.databinding.FragmentDriverHomeBinding
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch

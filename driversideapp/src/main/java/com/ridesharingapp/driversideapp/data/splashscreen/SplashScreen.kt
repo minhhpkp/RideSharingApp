@@ -14,9 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ridesharingapp.driversideapp.R
-import com.ridesharingapp.driversideapp.data.style.color_primary
-import com.ridesharingapp.driversideapp.data.style.color_white
-import com.ridesharingapp.driversideapp.data.style.typography
+import com.ridesharingapp.common.style.color_primary
+import com.ridesharingapp.common.style.color_white
+import com.ridesharingapp.common.style.typography
 
 
 @Composable

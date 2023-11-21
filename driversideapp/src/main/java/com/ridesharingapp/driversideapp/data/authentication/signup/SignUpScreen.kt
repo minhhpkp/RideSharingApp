@@ -33,10 +33,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.ridesharingapp.driversideapp.R
-import com.ridesharingapp.driversideapp.data.style.color_primary
-import com.ridesharingapp.driversideapp.data.style.color_white
-import com.ridesharingapp.driversideapp.data.style.typography
-import com.ridesharingapp.driversideapp.data.uicommon.AppHeader
+import com.ridesharingapp.common.style.color_primary
+import com.ridesharingapp.common.style.color_white
+import com.ridesharingapp.common.style.typography
+import com.ridesharingapp.common.uicommon.AppHeader
 
 @Composable
 fun SignUpScreen(
