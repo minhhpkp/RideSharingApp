@@ -5,12 +5,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.ridesharingapp.common.ServiceResult
-import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
-import com.ridesharingapp.passengersideapp.navigation.SignUpKey
 import com.ridesharingapp.common.services.FirebaseAuthService
 import com.ridesharingapp.common.services.LogInResult
 import com.ridesharingapp.common.uicommon.ToastMessages
 import com.ridesharingapp.common.usecases.LogInUser
+import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
+import com.ridesharingapp.passengersideapp.navigation.SignUpKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -85,27 +85,28 @@ class LoginViewModel(
     override fun onServiceActive() {
         Log.d("LoginViewModel", "onServiceActive")
         clearingPrevLogin = true
+        // attempt to logout of firebase account
         val fireAuthUser = authService.auth.currentUser
         if (fireAuthUser != null) {
             Log.d("LoginViewModel", "onServiceActive:firebaseUser ${fireAuthUser.email}")
             authService.logout()
-            val user = client.getCurrentUser()
-            if (user != null) {
-                Log.d("LoginViewModel", "onServiceActive:chatClientUser ${user.name}")
-                client.disconnect(flushPersistence = true).enqueue {
-                    clearingPrevLogin = false
-                    if (it.isError) {
-                        Log.w(
-                            "LoginViewModel",
-                            it.error().message ?: "Error logging out",
-                            it.error().cause
-                        )
-                    } else {
-                        Log.d("LoginViewModel", "clearing old user:disconnect chat client:success")
-                    }
-                }
-            } else {
+        }
+
+        // attempt to disconnect the current stream user
+        val user = client.getCurrentUser()
+        if (user != null) {
+            Log.d("LoginViewModel", "onServiceActive:chatClientUser ${user.name}")
+            client.disconnect(flushPersistence = true).enqueue {
                 clearingPrevLogin = false
+                if (it.isError) {
+                    Log.w(
+                        "LoginViewModel",
+                        it.error().message ?: "Error logging out",
+                        it.error().cause
+                    )
+                } else {
+                    Log.d("LoginViewModel", "clearing old user:disconnect chat client:success")
+                }
             }
         } else {
             clearingPrevLogin = false

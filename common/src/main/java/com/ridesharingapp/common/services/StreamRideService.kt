@@ -110,6 +110,7 @@ class StreamRideService(
                     this.launch {
                         observeOpenRides()
                     }
+                    Log.d("StreamRideService", "observeChannelEvents:ChannelDeletedEvent")
                     _rideModelUpdates.value = ServiceResult.Value(null)
                 }
 
