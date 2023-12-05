@@ -9,7 +9,7 @@ import com.ridesharingapp.common.domain.RideStatus
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.uicommon.ToastMessages
 import com.ridesharingapp.common.uicommon.combineTuple
-import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.driversideapp.navigation.ChatKey
 import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.ridesharingapp.driversideapp.navigation.ProfileSettingsKey

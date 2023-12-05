@@ -13,11 +13,11 @@ import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.services.StreamRideService
 import com.ridesharingapp.common.services.StreamUserService
 import com.ridesharingapp.common.services.UserService
-import com.ridesharingapp.common.usecase.GetUser
-import com.ridesharingapp.common.usecase.LogInUser
-import com.ridesharingapp.common.usecase.LogOutUser
-import com.ridesharingapp.common.usecase.SignUpUser
-import com.ridesharingapp.common.usecase.UpdateUserAvatar
+import com.ridesharingapp.common.usecases.GetUser
+import com.ridesharingapp.common.usecases.LogInUser
+import com.ridesharingapp.common.usecases.LogOutUser
+import com.ridesharingapp.common.usecases.SignUpUser
+import com.ridesharingapp.common.usecases.UpdateUserAvatar
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.rebind
@@ -72,6 +72,7 @@ class RideSharingApp : Application() {
             .add(logInUser)
             .add(logOutUser)
             .add(updateUserAvatar)
+            .add(streamClient)
             .build()
     }
 

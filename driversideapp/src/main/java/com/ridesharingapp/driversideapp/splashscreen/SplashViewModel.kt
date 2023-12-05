@@ -3,7 +3,7 @@ package com.ridesharingapp.driversideapp.splashscreen
 import android.util.Log
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
-import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
 import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.zhuinden.simplestack.Backstack

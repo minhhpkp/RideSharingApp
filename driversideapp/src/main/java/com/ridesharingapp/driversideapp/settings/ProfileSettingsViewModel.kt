@@ -6,9 +6,9 @@ import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.domain.UserType
 import com.ridesharingapp.common.services.UserService
 import com.ridesharingapp.common.uicommon.ToastMessages
-import com.ridesharingapp.common.usecase.GetUser
-import com.ridesharingapp.common.usecase.LogOutUser
-import com.ridesharingapp.common.usecase.UpdateUserAvatar
+import com.ridesharingapp.common.usecases.GetUser
+import com.ridesharingapp.common.usecases.LogOutUser
+import com.ridesharingapp.common.usecases.UpdateUserAvatar
 import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
 import com.zhuinden.simplestack.Backstack

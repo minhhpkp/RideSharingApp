@@ -2,7 +2,7 @@ package com.ridesharingapp.driversideapp.chat
 
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.uicommon.ToastMessages
-import com.ridesharingapp.common.usecase.GetUser
+import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
 import com.ridesharingapp.driversideapp.navigation.SplashKey
 import com.zhuinden.simplestack.Backstack

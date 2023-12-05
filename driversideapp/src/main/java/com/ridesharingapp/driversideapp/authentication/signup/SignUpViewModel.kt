@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.services.SignUpResult
 import com.ridesharingapp.common.uicommon.ToastMessages
-import com.ridesharingapp.common.usecase.SignUpUser
+import com.ridesharingapp.common.usecases.SignUpUser
 import com.ridesharingapp.driversideapp.navigation.SplashKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History

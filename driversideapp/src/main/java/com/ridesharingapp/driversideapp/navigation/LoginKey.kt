@@ -20,7 +20,7 @@ data class LoginKey(private val noArgsPlaceholder: String = ""): DefaultFragment
     //How to create a scoped service
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(LoginViewModel(backstack, lookup()))
+            add(LoginViewModel(backstack, lookup(), lookup(), lookup()))
         }
     }
 }

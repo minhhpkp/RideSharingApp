@@ -12,7 +12,7 @@ import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 
 class LoginFragment : Fragment() {
 
-    private val viewModel by lazy { lookup<com.ridesharingapp.driversideapp.authentication.login.LoginViewModel>()}
+    private val viewModel by lazy { lookup<LoginViewModel>()}
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
@@ -25,7 +25,7 @@ class LoginFragment : Fragment() {
             // is destroyed
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                com.ridesharingapp.driversideapp.authentication.login.LoginScreen(viewModel)
+                LoginScreen(viewModel)
             }
         }
     }

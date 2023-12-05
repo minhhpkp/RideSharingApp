@@ -2,12 +2,14 @@ package com.ridesharingapp.driversideapp.authentication.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -42,38 +44,47 @@ import com.ridesharingapp.common.uicommon.AppHeader
 fun LoginScreen(
     viewModel: LoginViewModel
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = color_white),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
+        if (viewModel.clearingPrevLogin || viewModel.loginInProcess)
+            CircularProgressIndicator()
+        else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = color_white),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
 
-        AppHeader(
-            modifier = Modifier.padding(top = 64.dp),
-            subtitleText = stringResource(id = R.string.need_a_ride)
-        )
+                AppHeader(
+                    modifier = Modifier.padding(top = 64.dp),
+                    subtitleText = stringResource(id = R.string.need_a_ride)
+                )
 
-        EmailInputField(
-            modifier = Modifier.padding(top = 16.dp),
-            viewModel = viewModel
-        )
+                EmailInputField(
+                    modifier = Modifier.padding(top = 16.dp),
+                    viewModel = viewModel
+                )
 
-        PasswordInputField(
-            modifier = Modifier.padding(top = 16.dp),
-            viewModel = viewModel
-        )
+                PasswordInputField(
+                    modifier = Modifier.padding(top = 16.dp),
+                    viewModel = viewModel
+                )
 
-        LoginContinueButton(
-            modifier = Modifier.padding(top = 32.dp),
-            handleLogin = { viewModel.handleLogin() }
-        )
+                LoginContinueButton(
+                    modifier = Modifier.padding(top = 32.dp),
+                    handleLogin = { viewModel.handleLogin() }
+                )
 
-        SignupText(
-            modifier = Modifier.padding(top = 32.dp),
-            viewModel = viewModel
-        )
+                SignupText(
+                    modifier = Modifier.padding(top = 32.dp),
+                    viewModel = viewModel
+                )
+            }
+        }
     }
 }
 
