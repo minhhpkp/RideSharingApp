@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.ActivityMainBinding
 import com.ridesharingapp.driversideapp.navigation.LoginKey
+import com.ridesharingapp.driversideapp.navigation.SplashKey
+import com.ridesharingapp.driversideapp.splashscreen.SplashScreen
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .setStateChanger(SimpleStateChanger(this))
             .setScopedServices(DefaultServiceProvider())
             .setGlobalServices((application as RideSharingApp).globalServices)
-            .install(this, binding.container, History.single(LoginKey()))
+            .install(this, binding.container, History.single(SplashKey()))
     }
     override fun onBackPressed() {
         if (!backstack.goBack()) {
