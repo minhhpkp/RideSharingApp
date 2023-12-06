@@ -4,6 +4,7 @@ import android.util.Log
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.usecases.GetUser
+import com.ridesharingapp.passengersideapp.RideSharingApp
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
 import com.zhuinden.simplestack.Backstack
@@ -57,6 +58,7 @@ class SplashViewModel(
     override fun onServiceActive() {
         Log.d("SplashViewModel", "onServiceActive")
         checkAuthState()
+
     }
 
     //Tear down

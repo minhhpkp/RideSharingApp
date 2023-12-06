@@ -18,6 +18,7 @@ import com.ridesharingapp.common.usecases.LogInUser
 import com.ridesharingapp.common.usecases.LogOutUser
 import com.ridesharingapp.common.usecases.SignUpUser
 import com.ridesharingapp.common.usecases.UpdateUserAvatar
+import com.ridesharingapp.passengersideapp.notification.NotificationService
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestackextensions.servicesktx.add
 import com.zhuinden.simplestackextensions.servicesktx.rebind
@@ -30,10 +31,11 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 class RideSharingApp : Application() {
     lateinit var globalServices: GlobalServices
     lateinit var geoContext: GeoApiContext
+    lateinit var service: NotificationService
 
     override fun onCreate() {
         super.onCreate()
-
+        service = NotificationService(applicationContext)
         MapsInitializer.initialize(this)
         geoContext = GeoApiContext.Builder()
             .apiKey(BuildConfig.MAPS_API_KEY)
