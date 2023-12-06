@@ -183,6 +183,8 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
 
+            app.service.showNotification("Tài xế của bạn đã đến điểm đón", "", R.drawable.message)
+
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
             autocompleteResults.adapter = null
@@ -221,6 +223,8 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+
+
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
