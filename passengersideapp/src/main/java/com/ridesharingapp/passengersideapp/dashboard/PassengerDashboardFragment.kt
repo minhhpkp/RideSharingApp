@@ -224,6 +224,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
 
+            app.service.showNotification("Đã có tài xế nhận chuyến xe của bạn", "", R.drawable.message)
 
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
