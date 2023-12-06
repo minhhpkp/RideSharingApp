@@ -8,6 +8,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:423466378948:android:01c2b8d0be5ff3a2114b91",
+        "android_client_info": {
+          "package_name": "com.bracketcove.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAuiZ7E5vC3qpLBkJnsEMK2INlehK6sfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:423466378948:android:fdfd57b12f7be216114b91",
         "android_client_info": {
           "package_name": "com.ridesharingapp.driversideapp"

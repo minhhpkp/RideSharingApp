@@ -83,6 +83,9 @@ class LoginViewModel(
 
     // Logout the current user (if exists)
     override fun onServiceActive() {
+
+
+
         Log.d("LoginViewModel", "onServiceActive")
         clearingPrevLogin = true
         val fireAuthUser = authService.auth.currentUser

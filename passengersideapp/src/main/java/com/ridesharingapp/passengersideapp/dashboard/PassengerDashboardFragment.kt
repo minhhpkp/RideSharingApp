@@ -46,6 +46,7 @@ import com.ridesharingapp.common.uicommon.handleToast
 import com.ridesharingapp.common.uicommon.hideKeyboard
 import com.ridesharingapp.passengersideapp.BuildConfig
 import com.ridesharingapp.passengersideapp.RideSharingApp
+import com.ridesharingapp.passengersideapp.notification.NotificationService
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -54,12 +55,13 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
     OnMapReadyCallback {
 
     private val viewModel by lazy { lookup<PassengerDashboardViewModel>() }
-
+    val app = requireActivity().application as RideSharingApp
 
     private var mapView: MapView? = null
     private var googleMap: GoogleMap? = null
     private var locationRequest: LocationRequest? = null
     private lateinit var locationClient: FusedLocationProviderClient
+
 
     lateinit var binding: FragmentPassengerDashboardBinding
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -126,7 +128,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
     private fun updateMessageButton(messageCount: Int) {
         binding.chatButton.text = if (messageCount == 0) getString(R.string.contact_driver)
-        else getString(R.string.you_have_messages)
+        else getString(R.string.you_have_messages) // bạn có tin nhắn mới
 //        else buildString {
 //            append(messageCount)
 //            append(R.string.new_messages)
@@ -170,6 +172,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                 .into(binding.avatar)
 
             driverInfoLayout.visibility = View.VISIBLE
+
         }
     }
 
