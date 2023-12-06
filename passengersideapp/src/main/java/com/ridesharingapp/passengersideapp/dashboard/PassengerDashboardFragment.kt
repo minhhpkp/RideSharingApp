@@ -127,12 +127,11 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
     }
 
     private fun updateMessageButton(messageCount: Int) {
-        binding.chatButton.text = if (messageCount == 0) getString(R.string.contact_driver)
-        else getString(R.string.you_have_messages) // bạn có tin nhắn mới
-//        else buildString {
-//            append(messageCount)
-//            append(R.string.new_messages)
-//        }
+        if(messageCount == 0) binding.chatButton.text = getString(R.string.contact_driver)
+        else {
+            binding.chatButton.text = getString(R.string.you_have_messages)
+            app.service.showNotification("Bạn có tin nhắn mới", "", R.drawable.message)
+        }
     }
 
     private fun arrived(uiState: PassengerDashboardUiState.Arrived) {
@@ -141,6 +140,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
             rideComplete.rideCompleteLayout.visibility = View.VISIBLE
+
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
