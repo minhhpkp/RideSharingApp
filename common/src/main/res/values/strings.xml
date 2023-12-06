@@ -86,7 +86,7 @@
     <string name="contact_driver">Liên lạc với tài xế</string>
     <string name="check_again">Kiểm tra lại</string>
 <!--    <string name="new_messages">" new messages"</string>-->
-    <string name="you_have_messages">Bạn có tin nhắn mới</string>
+    <string name="you_have_messages">Bạn có %d tin nhắn mới</string>
     <string name="unable_to_calculate_distance">"Unable to calculate"</string>
     <string name="trip_is">"Trip is: "</string>
     <string name="from_passenger">" so với hành khách"</string>

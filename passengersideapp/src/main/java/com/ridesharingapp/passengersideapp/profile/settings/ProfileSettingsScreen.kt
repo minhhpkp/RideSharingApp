@@ -30,9 +30,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.domain.UserType
 import com.ridesharingapp.common.style.color_black
 import com.ridesharingapp.common.style.color_primary
 import com.ridesharingapp.common.style.color_white
@@ -57,7 +55,7 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun ProfileSettingsScreen(
     viewModel: ProfileSettingsViewModel,
-    unregisteredUserView: Boolean
+//    unregisteredUserView: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -68,9 +66,9 @@ fun ProfileSettingsScreen(
     ) {
         ProfileToolbar(viewModel = viewModel)
 
-        var driverSwitchState by rememberSaveable {
+        /*var driverSwitchState by rememberSaveable {
             mutableStateOf(false)
-        }
+        }*/
 
         val user by viewModel.userModel.collectAsState()
 
@@ -104,7 +102,7 @@ fun ProfileToolbar(
     viewModel: ProfileSettingsViewModel
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(16.dp),
@@ -160,7 +158,7 @@ fun ProfileAvatar(
     user: GrabLamUser
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize()
             .padding(start = 16.dp),
         contentAlignment = Alignment.BottomEnd
@@ -217,7 +215,7 @@ fun UserTypeState(
                 modifier = Modifier
                     .wrapContentHeight(align = Alignment.Top)
                     .padding(top = 16.dp),
-                text = if (user.type != com.ridesharingapp.common.domain.UserType.PASSENGER.value) stringResource(id = R.string.driver)
+                text = if (user.type != UserType.PASSENGER.value) stringResource(id = R.string.driver)
                 else stringResource(id = R.string.passenger),
                 style = typography.h3
             )
@@ -227,7 +225,7 @@ fun UserTypeState(
                     .wrapContentSize()
                     .padding(bottom = 16.dp)
                     .scale(1.5f),
-                checked = user.type != com.ridesharingapp.common.domain.UserType.PASSENGER.value,
+                checked = user.type != UserType.PASSENGER.value,
                 onCheckedChange = { viewModel.handleToggleUserType() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = color_primary,

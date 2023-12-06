@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 class StreamRideService(
     private val client: ChatClient
@@ -53,6 +54,8 @@ class StreamRideService(
 
     override fun openRides(): Flow<ServiceResult<List<Ride>>> = _openRides
     override fun rideFlow(): Flow<ServiceResult<Ride?>> = _rideModelUpdates
+
+    private var _lastMessageAt: Date? = null
 
     override suspend fun observeRideById(rideId: String) {
         withContext(Dispatchers.IO) {
@@ -130,11 +133,17 @@ class StreamRideService(
                         newChannelClient.create(emptyList(), mutableMapOf()).enqueue { result ->
                             if (result.isSuccess) {
                                 val lastMessageAt = result.data().lastMessageAt
-                                val hasMessage = if (lastMessageAt == null) 0 else 1
+                                val hasMessage = if (lastMessageAt == _lastMessageAt) 0
+                                else {
+                                    _lastMessageAt = lastMessageAt
+                                    1
+                                }
                                 _rideModelUpdates.value = ServiceResult.Value(
-                                    currentRideModel.value.copy(
-                                        totalMessages = hasMessage
-                                    )
+                                    currentRideModel.value.let {
+                                        it.copy(
+                                            totalMessages = it.totalMessages + hasMessage
+                                        )
+                                    }
                                 )
                             } else {
                                 Log.w("observeChannelEvents", "NewMessageEvent:create failed", result.error().cause)

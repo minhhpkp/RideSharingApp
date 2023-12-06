@@ -100,13 +100,6 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
         else binding.toolbar.profileIcon.visibility = View.VISIBLE
 
         when (uiState) {
-            is HomeUiState.Arrived -> updateMessageButton(uiState.totalMessages)
-            is HomeUiState.EnRoute -> updateMessageButton(uiState.totalMessages)
-            is HomeUiState.PassengerPickUp -> updateMessageButton(uiState.totalMessages)
-            else -> Unit
-        }
-
-        when (uiState) {
             HomeUiState.Error -> viewModel.handleError()
             HomeUiState.Loading -> {
                 binding.loadingView.loadingLayout.visibility = View.VISIBLE
@@ -115,6 +108,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             is HomeUiState.PassengerPickUp -> passengerPickUp(uiState)
             is HomeUiState.EnRoute -> enRoute(uiState)
             is HomeUiState.Arrived -> arrived(uiState)
+            is HomeUiState.NewMessages -> updateMessageButton(uiState.totalMessages)
         }
 
         updateMap(uiState)
@@ -122,7 +116,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
 
     private fun updateMessageButton(messageCount: Int) {
         binding.chatButton.text = if (messageCount == 0) getString(R.string.contact_passenger)
-        else getString(R.string.you_have_messages)
+        else getString(R.string.you_have_messages, messageCount)
     }
 
     private fun arrived(uiState: HomeUiState.Arrived) {
@@ -181,7 +175,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             advanceLayout.advanceRideStateLayout.visibility = View.VISIBLE
 
             advanceLayout.advanceButton.setImageResource(R.drawable.ic_arrival)
-            advanceLayout.advanceButton.setOnLongClickListener() {
+            advanceLayout.advanceButton.setOnLongClickListener {
                 viewModel.advanceRide()
                 true
             }

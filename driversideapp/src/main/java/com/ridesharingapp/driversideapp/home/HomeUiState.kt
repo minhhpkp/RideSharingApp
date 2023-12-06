@@ -11,8 +11,7 @@ sealed interface HomeUiState {
         val destinationLon: Double,
         val destinationAddress: String,
         val passengerName: String,
-        val passengerAvatar: String,
-        val totalMessages: Int
+        val passengerAvatar: String
     ): HomeUiState
     data class EnRoute(
         val driverLat: Double,
@@ -21,8 +20,7 @@ sealed interface HomeUiState {
         val destinationLon: Double,
         val destinationAddress: String,
         val passengerName: String,
-        val passengerAvatar: String,
-        val totalMessages: Int
+        val passengerAvatar: String
     ): HomeUiState
 
     data class Arrived(
@@ -32,11 +30,12 @@ sealed interface HomeUiState {
         val destinationLon: Double,
         val destinationAddress: String,
         val passengerName: String,
-        val passengerAvatar: String,
-        val totalMessages: Int
+        val passengerAvatar: String
     ): HomeUiState
 
     //Signals something unexpected has happened
     object Error: HomeUiState
     object Loading: HomeUiState
+
+    data class NewMessages(val totalMessages: Int) : HomeUiState
 }

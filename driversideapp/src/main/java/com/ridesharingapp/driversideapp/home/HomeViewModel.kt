@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -44,6 +45,7 @@ class HomeViewModel(
     private val _driverModel = MutableStateFlow<GrabLamUser?>(null)
     private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
     private val _mapIsReady = MutableStateFlow(false)
+    private val _currentMessagesCount = MutableStateFlow(0)
 
     /*
     Different UI states:
@@ -75,8 +77,7 @@ class HomeViewModel(
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
                     passengerName = ride.passengerName,
-                    passengerAvatar = ride.passengerAvatarUrl,
-                    totalMessages = ride.totalMessages
+                    passengerAvatar = ride.passengerAvatarUrl
                 )
 
                 ride.status == RideStatus.EN_ROUTE.value
@@ -88,8 +89,7 @@ class HomeViewModel(
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
                     passengerName = ride.passengerName,
-                    passengerAvatar = ride.passengerAvatarUrl,
-                    totalMessages = ride.totalMessages
+                    passengerAvatar = ride.passengerAvatarUrl
                 )
 
                 ride.status == RideStatus.ARRIVED.value
@@ -101,12 +101,22 @@ class HomeViewModel(
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
                     passengerName = ride.passengerName,
-                    passengerAvatar = ride.passengerAvatarUrl,
-                    totalMessages = ride.totalMessages
+                    passengerAvatar = ride.passengerAvatarUrl
                 )
 
+                (ride.status == RideStatus.PASSENGER_PICK_UP.value
+                        || ride.status == RideStatus.EN_ROUTE.value
+                        || ride.status == RideStatus.ARRIVED.value)
+                        && ride.driverLatitude != null
+                        && ride.driverLongitude != null
+                        && ride.totalMessages != _currentMessagesCount.value
+                -> {
+                    _currentMessagesCount.update { ride.totalMessages }
+                    HomeUiState.NewMessages(ride.totalMessages)
+                }
+
                 else -> {
-                    Log.d("ELSE", "${driver}, ${ride}")
+                    Log.e("ELSE", "${driver}, ${ride}")
                     HomeUiState.Error
                 }
             }

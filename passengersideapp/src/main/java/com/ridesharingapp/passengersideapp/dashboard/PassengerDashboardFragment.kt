@@ -46,7 +46,6 @@ import com.ridesharingapp.common.uicommon.handleToast
 import com.ridesharingapp.common.uicommon.hideKeyboard
 import com.ridesharingapp.passengersideapp.BuildConfig
 import com.ridesharingapp.passengersideapp.RideSharingApp
-import com.ridesharingapp.passengersideapp.notification.NotificationService
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -105,13 +104,6 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
         else binding.toolbar.profileIcon.visibility = View.VISIBLE
 
         when (uiState) {
-            is PassengerDashboardUiState.Arrived -> updateMessageButton(uiState.totalMessages)
-            is PassengerDashboardUiState.EnRoute -> updateMessageButton(uiState.totalMessages)
-            is PassengerDashboardUiState.PassengerPickUp -> updateMessageButton(uiState.totalMessages)
-            else -> Unit
-        }
-
-        when (uiState) {
             PassengerDashboardUiState.Error -> viewModel.handleError()
             PassengerDashboardUiState.Loading -> {
                 binding.loadingView.loadingLayout.visibility = View.VISIBLE
@@ -121,6 +113,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             is PassengerDashboardUiState.PassengerPickUp -> passengerPickUp(uiState)
             is PassengerDashboardUiState.EnRoute -> enRoute(uiState)
             is PassengerDashboardUiState.Arrived -> arrived(uiState)
+            is PassengerDashboardUiState.NewMessages -> updateMessageButton(uiState.totalMessages)
         }
 
         updateMap(uiState)
@@ -129,8 +122,8 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
     private fun updateMessageButton(messageCount: Int) {
         if(messageCount == 0) binding.chatButton.text = getString(R.string.contact_driver)
         else {
-            binding.chatButton.text = getString(R.string.you_have_messages)
-            app.service.showNotification("Bạn có tin nhắn mới", "", R.drawable.message)
+            binding.chatButton.text = getString(R.string.you_have_messages, messageCount)
+            app.service.showNotification("Bạn có $messageCount tin nhắn mới", "", R.drawable.message)
         }
     }
 

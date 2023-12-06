@@ -5,6 +5,8 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.maps.model.LatLng
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
+import com.ridesharingapp.common.domain.Ride
+import com.ridesharingapp.common.domain.RideStatus
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.uicommon.ToastMessages
 import com.ridesharingapp.common.uicommon.combineTuple
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -42,9 +45,10 @@ class PassengerDashboardViewModel(
 
     internal var toastHandler: ((ToastMessages) -> Unit)? = null
 
-    private var _passengerModel = MutableStateFlow<GrabLamUser?>(null)
-    private var _rideModel: Flow<ServiceResult<com.ridesharingapp.common.domain.Ride?>> = rideService.rideFlow()
+    private val _passengerModel = MutableStateFlow<GrabLamUser?>(null)
+    private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
     private val _mapIsReady = MutableStateFlow(false)
+    private val _currentMessagesCount = MutableStateFlow(0)
 
     /*
     Different UI states:
@@ -80,7 +84,7 @@ class PassengerDashboardViewModel(
                     ride.destinationAddress
                 )
 
-                ride.status == com.ridesharingapp.common.domain.RideStatus.PASSENGER_PICK_UP.value
+                ride.status == RideStatus.PASSENGER_PICK_UP.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.PassengerPickUp(
                     passengerLat = ride.passengerLatitude,
@@ -92,10 +96,9 @@ class PassengerDashboardViewModel(
                     destinationAddress = ride.destinationAddress,
                     driverName = ride.driverName ?: "Error",
                     driverAvatar = ride.driverAvatarUrl ?: "",
-                    totalMessages = ride.totalMessages
                 )
 
-                ride.status == com.ridesharingapp.common.domain.RideStatus.EN_ROUTE.value
+                ride.status == RideStatus.EN_ROUTE.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.EnRoute(
                     passengerLat = ride.passengerLatitude,
@@ -105,12 +108,11 @@ class PassengerDashboardViewModel(
                     destinationLat = ride.destinationLatitude,
                     destinationLon = ride.destinationLongitude,
                     driverAvatar = ride.driverAvatarUrl ?: "",
-                    totalMessages = ride.totalMessages,
                     driverLat = ride.driverLatitude!!,
                     driverLon = ride.driverLongitude!!
                 )
 
-                ride.status == com.ridesharingapp.common.domain.RideStatus.ARRIVED.value
+                ride.status == RideStatus.ARRIVED.value
                         && ride.driverLatitude != null
                         && ride.driverLongitude != null -> PassengerDashboardUiState.Arrived(
                     passengerLat = ride.passengerLatitude,
@@ -120,11 +122,22 @@ class PassengerDashboardViewModel(
                     destinationLon = ride.destinationLongitude,
                     destinationAddress = ride.destinationAddress,
                     driverAvatar = ride.driverAvatarUrl ?: "",
-                    totalMessages = ride.totalMessages
                 )
 
+                (ride.status == RideStatus.PASSENGER_PICK_UP.value
+                        || ride.status == RideStatus.EN_ROUTE.value
+                        || ride.status == RideStatus.ARRIVED.value)
+                        && ride.driverLatitude != null
+                        && ride.driverLongitude != null
+                        && ride.totalMessages != _currentMessagesCount.value
+                -> {
+                    // this variable is used so that we only emit each new message event only once
+                    _currentMessagesCount.update { ride.totalMessages }
+                    PassengerDashboardUiState.NewMessages(ride.totalMessages)
+                }
+
                 else -> {
-                    Log.d("ELSE", "${passenger}, $ride")
+                    Log.e("ELSE", "${passenger}, $ride")
                     PassengerDashboardUiState.Error
                 }
             }
