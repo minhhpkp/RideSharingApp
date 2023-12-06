@@ -141,6 +141,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             searchingLayout.visibility = View.GONE
             rideComplete.rideCompleteLayout.visibility = View.VISIBLE
 
+            app.service.showNotification("Bạn đã tới nơi", "", R.drawable.message)
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
