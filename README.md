@@ -1,2 +1,2 @@
 # RideSharingApp
- A Simple Ride Sharing App
+ A Simple Ride Sharing App.
