@@ -1,16 +1,11 @@
 package com.ridesharingapp.passengersideapp
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.ActivityMainBinding
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
-import com.ridesharingapp.passengersideapp.notification.NotificationService
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
@@ -21,10 +16,8 @@ import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
     private lateinit var fragmentStateChanger: DefaultFragmentStateChanger
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        createNotificationChanel()
 
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -40,21 +33,7 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .install(this, binding.container, History.single(SplashKey()))
     }
 
-    private fun createNotificationChanel() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NotificationService.CHANNEL_ID,
-                "test",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channel.description = "Just a test channel"
-
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private val backPressedCallback = object: OnBackPressedCallback(true) {
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             if (!Navigator.onBackPressed(this@MainActivity)) {
                 this.remove() // this is the only safe way to invoke onBackPressed while cancelling the execution of this callback
@@ -64,7 +43,8 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
         }
     }
 
-    @Deprecated("Deprecated in Java",
+    @Deprecated(
+        "Deprecated in Java",
         ReplaceWith("super.onBackPressed()", "androidx.appcompat.app.AppCompatActivity")
     )
     @Suppress("RedundantModalityModifier")

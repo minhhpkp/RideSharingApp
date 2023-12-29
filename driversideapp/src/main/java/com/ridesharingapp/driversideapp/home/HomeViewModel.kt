@@ -44,7 +44,7 @@ class HomeViewModel(
 
     private val _driverModel = MutableStateFlow<GrabLamUser?>(null)
     private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
-    private val _mapIsReady = MutableStateFlow(false)
+//    private val _mapIsReady = MutableStateFlow(false)
     private val _currentMessagesCount = MutableStateFlow(0)
 
     /*
@@ -57,7 +57,8 @@ class HomeViewModel(
         - EN_ROUTE
         - ARRIVED
      */
-    val uiState = combineTuple(_driverModel, _rideModel, _mapIsReady).map { (driver, rideResult, isMapReady) ->
+    val uiState = combineTuple(_driverModel, _rideModel/*, _mapIsReady*/).map { (driver, rideResult/*, isMapReady*/) ->
+        val isMapReady = true
         if (rideResult is ServiceResult.Failure) return@map HomeUiState.Error
         val ride = (rideResult as ServiceResult.Value).value
 
@@ -130,25 +131,25 @@ class HomeViewModel(
 
     //I don't want a driver to be able to accept a ride unless we know their location first.
     val locationAwarePassengerList = combineTuple(_driverLocation, _passengerList).map {
-        if (it.first.lat == DEFAULT_LAT_OR_LON
-            || it.first.lng == DEFAULT_LAT_OR_LON
-        ) emptyList<Pair<Ride, LatLng>>()
-        else {
+//        if (it.first.lat == DEFAULT_LAT_OR_LON
+//            || it.first.lng == DEFAULT_LAT_OR_LON
+//        ) emptyList()
+//        else {
             if (it.second is ServiceResult.Failure) {
                 handleError()
-                emptyList<Pair<Ride, LatLng>>()
+                emptyList()
             } else {
                 val result = it.second as ServiceResult.Value
                 result.value.map { ride ->
                     Pair(ride, _driverLocation.value)
                 }
             }
-        }
+//        }
     }
 
-    fun mapIsReady() {
+    /*fun mapIsReady() {
         _mapIsReady.value = true
-    }
+    }*/
 
     fun getDriver() = launch(Dispatchers.Main) {
         val getUser = getUser.getUser()
@@ -201,9 +202,9 @@ class HomeViewModel(
 
     fun handlePassengerItemClick(clickedRide: Ride) = launch(Dispatchers.Main) {
         //We must only proceed if driver LatLng are real values!
-        if (_driverLocation.value.lat != DEFAULT_LAT_OR_LON
-            && _driverLocation.value.lng != DEFAULT_LAT_OR_LON
-        ) {
+//        if (_driverLocation.value.lat != DEFAULT_LAT_OR_LON
+//            && _driverLocation.value.lng != DEFAULT_LAT_OR_LON
+//        ) {
             val result = rideService.connectDriverToRide(
                 clickedRide.copy(
                     driverLatitude = _driverLocation.value.lat,
@@ -218,9 +219,9 @@ class HomeViewModel(
                     rideService.observeRideById(result.value)
                 }
             }
-        } else {
-            toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_USER_COORDINATES)
-        }
+//        } else {
+//            toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_USER_COORDINATES)
+//        }
     }
 
     fun goToProfile() {
@@ -230,7 +231,7 @@ class HomeViewModel(
         )
     }
 
-    fun updateDriverLocation(latLng: LatLng) = launch(Dispatchers.Main) {
+    /*fun updateDriverLocation(latLng: LatLng) = launch(Dispatchers.Main) {
         _driverLocation.value = latLng
 
         val currentRide = _rideModel.first()
@@ -246,7 +247,7 @@ class HomeViewModel(
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
         }
-    }
+    }*/
 
     fun cancelRide() = launch(Dispatchers.Main) {
         val cancelRide = rideService.cancelRide()

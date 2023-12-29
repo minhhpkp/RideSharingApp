@@ -4,5 +4,5 @@ import com.google.android.libraries.places.api.model.AutocompletePrediction
 
 data class AutoCompleteModel(
     val address: String,
-    val prediction: AutocompletePrediction
+    val prediction: AutocompletePrediction?
 )

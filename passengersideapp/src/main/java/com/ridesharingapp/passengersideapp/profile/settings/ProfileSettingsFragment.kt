@@ -18,7 +18,7 @@ class ProfileSettingsFragment : Fragment() {
             // is destroyed
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                ProfileSettingsScreen(viewModel, viewModel.isUserRegistered())
+                ProfileSettingsScreen(viewModel/*, viewModel.isUserRegistered()*/)
             }
         }
     }

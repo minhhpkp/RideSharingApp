@@ -57,8 +57,8 @@
     <string name="no_passengers">Hiện tại không có hành khách gần mình.</string>
     <string name="passenger_location">Vị trí hành khách</string>
     <string name="cancel">Hủy</string>
-    <string name="arrived_at_destination">Đã đến điểm trả khách\n(Hold Icon Down)</string>
-    <string name="pick_up_passenger">Đón khách thành công\n(Hold Icon Down)</string>
+    <string name="arrived_at_destination">Đã đến điểm trả khách\n(Bấm và giữ để tiếp tục)</string>
+    <string name="pick_up_passenger">Đón khách thành công\n(Bấm và giữ để tiếp tục)</string>
     <string name="return_to_dashboard">Trở lại trang chủ</string>
     <string name="ride_completed">Chuyến xe\nHoàn thành</string>
     <string name="generic_error">An error has occurred.</string>
