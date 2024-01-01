@@ -1,6 +1,7 @@
 package com.ridesharingapp.passengersideapp.profile.settings
 
 import android.net.Uri
+import android.util.Log
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.domain.UserType
@@ -20,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -34,22 +37,21 @@ class ProfileSettingsViewModel(
 
     private val _userModel = MutableStateFlow<GrabLamUser?>(null)
     val userModel: StateFlow<GrabLamUser?> get() = _userModel
+    private val _profilePicUpdateInProgress = MutableStateFlow(false)
+    val profilePicUpdateInProgress: StateFlow<Boolean> get() = _profilePicUpdateInProgress.asStateFlow()
+
     fun handleLogOut() = launch(Dispatchers.Main) {
         logUserOut.logout()
         sendToLogin()
     }
 
-    fun isUserRegistered(): Boolean {
-        return false
-    }
-
-    fun getUser() = launch(Dispatchers.Main) {
-        val getUser = getUser.getUser()
-        when (getUser) {
+    private fun getUser() = launch(Dispatchers.Main) {
+        when (val getUser = getUser.getUser()) {
             is ServiceResult.Failure -> {
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
                 sendToLogin()
             }
+
             is ServiceResult.Value -> {
                 if (getUser.value == null) sendToLogin()
                 else _userModel.value = getUser.value
@@ -73,23 +75,27 @@ class ProfileSettingsViewModel(
         toastHandler = null
     }
 
-    fun handleThumbnailUpdate(imageUri: Uri?) = launch(Dispatchers.Main) {
-        if (imageUri != null) {
-            val updateAttempt =
-                updateUserAvatar.updateAvatar(_userModel.value!!, imageUri.toString())
+    fun handleThumbnailUpdate(imageUri: Uri?) {
+        launch(Dispatchers.Main) {
+            if (imageUri != null) {
+                Log.d("ProfileSettingsViewModel", imageUri.toString())
+                _profilePicUpdateInProgress.update { true }
+                val updateAttempt =
+                    updateUserAvatar.updateAvatar(_userModel.value!!, imageUri.toString())
+                when (updateAttempt) {
+                    is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
 
-            when (updateAttempt) {
-                is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
-
-                is ServiceResult.Value -> {
-                    _userModel.value = _userModel.value!!.copy(
-                        avatarPhotoUrl = updateAttempt.value
-                    )
-                    toastHandler?.invoke(ToastMessages.UPDATE_SUCCESSFUL)
+                    is ServiceResult.Value -> {
+                        _userModel.value = _userModel.value!!.copy(
+                            avatarPhotoUrl = updateAttempt.value
+                        )
+                        toastHandler?.invoke(ToastMessages.UPDATE_SUCCESSFUL)
+                    }
                 }
+                _profilePicUpdateInProgress.update { false }
+            } else {
+                toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
             }
-        } else {
-            toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
         }
     }
 

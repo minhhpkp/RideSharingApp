@@ -63,6 +63,9 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             viewModel.openChat()
         }
         binding.toolbar.profileIcon.setOnClickListener {
+            viewModel.goToProfile()
+        }
+        binding.searchEditText.setOnClickListener {
             viewModel.handleSearchItemClick(
                 AutoCompleteModel(address = "Some address", prediction = null)
             )

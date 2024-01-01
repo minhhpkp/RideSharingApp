@@ -11,6 +11,7 @@ import com.ridesharingapp.common.uicommon.combineTuple
 import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.passengersideapp.navigation.ChatKey
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
+import com.ridesharingapp.passengersideapp.navigation.ProfileSettingsKey
 import com.ridesharingapp.passengersideapp.navigation.SplashKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
@@ -342,12 +343,12 @@ class PassengerDashboardViewModel(
         }
     }
 
-    /*fun goToProfile() {
+    fun goToProfile() {
         //normally we would use backStack.goTo(...), but we always want to reload the state
         //of the dashboard
         backstack.setHistory(
             History.of(ProfileSettingsKey()),
             StateChange.FORWARD
         )
-    }*/
+    }
 }
