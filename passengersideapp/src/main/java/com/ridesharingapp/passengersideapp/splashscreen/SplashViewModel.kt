@@ -4,7 +4,6 @@ import android.util.Log
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.usecases.GetUser
-import com.ridesharingapp.passengersideapp.RideSharingApp
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
 import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
 import com.zhuinden.simplestack.Backstack
@@ -34,18 +33,24 @@ class SplashViewModel(
         when (val getUser = getUser.getUser()) {
             //there's nothing else to do but send to the login page
             is ServiceResult.Failure -> {
-                Log.e("SplashViewModel", "checkAuthState:getUser failed", getUser.exception)
+                Log.e("SplashViewModel", "failed to get current user", getUser.exception)
                 sendToLogin()
             }
             is ServiceResult.Value -> {
-                if (getUser.value == null) sendToLogin()
-                else sendToDashboard(getUser.value!!)
+                if (getUser.value == null) {
+                    Log.d("SplashViewModel", "checkAuthState: null user")
+                    sendToLogin()
+                }
+                else {
+                    Log.d("SplashViewModel", "get current user successfully")
+                    sendToDashboard(getUser.value!!)
+                }
             }
         }
     }
 
     private fun sendToDashboard(user: GrabLamUser) {
-        Log.d("VM_USER", user.toString())
+        Log.d("SplashViewMode", "logged in user: $user")
 
         backstack.setHistory(
             History.of((PassengerDashboardKey())),
@@ -56,9 +61,7 @@ class SplashViewModel(
 
     //Lifecycle method to Fetch things if necessary
     override fun onServiceActive() {
-        Log.d("SplashViewModel", "onServiceActive")
         checkAuthState()
-
     }
 
     //Tear down

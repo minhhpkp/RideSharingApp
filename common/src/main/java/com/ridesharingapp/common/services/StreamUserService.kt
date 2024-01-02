@@ -21,17 +21,18 @@ class StreamUserService(
      * Due to permission issues with roles, all users must be elevated to admin to be able to
      * add themselves to channels they
      */
-    private fun updateRole(userId: String) {
-        client.partialUpdateUser(
-            id = userId,
-            set = mutableMapOf(
-                KEY_ROLE to "admin"
-            )
-        ).enqueue {
-            if (it.isSuccess) Log.d("StreamUserService", "updateRole:success")
-            else Log.w("StreamUserService", "updateRole:failed", it.error().cause)
-        }
-    }
+      private fun updateRole(userId: String) {
+          client.partialUpdateUser(
+              id = userId,
+              set = mutableMapOf(
+                  KEY_ROLE to "user"
+              )
+          ).enqueue {
+              if (it.isSuccess) Log.d("StreamUserService", "updateRole:success")
+              else Log.w("StreamUserService", "updateRole:failed", it.error().cause)
+          }
+      }
+
     override suspend fun getUserById(userId: String): ServiceResult<GrabLamUser?> =
         withContext(Dispatchers.IO) {
             val currentUser = client.getCurrentUser()
@@ -40,7 +41,7 @@ class StreamUserService(
                 val type: String? = extraData[KEY_TYPE] as String?
                 val status: String? = extraData[KEY_STATUS] as String?
 
-                if (currentUser.role == "user") updateRole(userId)
+                if (currentUser.role == "admin") updateRole(userId)
 
                 ServiceResult.Value(
                     GrabLamUser(
@@ -53,7 +54,7 @@ class StreamUserService(
                         type = type ?: ""
                     )
                 )
-            } else if (currentUser != null){
+            } else if (currentUser != null) {
                 val streamUser = User(
                     id = userId
                 )
@@ -67,7 +68,7 @@ class StreamUserService(
                     val type: String? = extraData[KEY_TYPE] as String?
                     val status: String? = extraData[KEY_STATUS] as String?
 
-                    if (currentUser.role == "user") updateRole(userId)
+//                    if (currentUser.role == "user") updateRole(userId)
 
                     ServiceResult.Value(
                         GrabLamUser(
@@ -81,9 +82,10 @@ class StreamUserService(
                         )
                     )
                 } else {
-                    Log.d(
-                        "GET_USER_BY_ID",
-                        getUserResult.error().message ?: "Stream error occurred for update user"
+                    Log.e(
+                        "StreamUserService",
+                        "getUserById: ${getUserResult.error().message}",
+                        getUserResult.error().cause ?: Exception("Stream error occurred for update user")
                     )
                     ServiceResult.Failure(Exception(getUserResult.error().message))
                 }
@@ -130,7 +132,6 @@ class StreamUserService(
                 set = mutableMapOf(
                     KEY_STATUS to user.status,
                     KEY_TYPE to user.type,
-                    KEY_ROLE to "admin",
                     KEY_IMAGE to user.avatarPhotoUrl
                 )
             ).await()
@@ -164,8 +165,6 @@ class StreamUserService(
 
             val devToken = client.devToken(user.userId)
             val result = client.connectUser(streamUser, devToken).await()
-
-            println("${user.userId}, ${user.username}, ${devToken}, $result")
 
             if (result.isSuccess) {
                 ServiceResult.Value(

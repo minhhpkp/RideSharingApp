@@ -65,7 +65,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
         binding.toolbar.profileIcon.setOnClickListener {
             viewModel.goToProfile()
         }
-        binding.searchEditText.setOnClickListener {
+        binding.destinationTitle.setOnClickListener {
             viewModel.handleSearchItemClick(
                 AutoCompleteModel(address = "Some address", prediction = null)
             )
@@ -86,7 +86,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             }
 
             is PassengerDashboardUiState.RideInactive -> rideInactiveState()
-            is PassengerDashboardUiState.SearchingForDriver -> searchingForDriverState(/*uiState*/)
+            is PassengerDashboardUiState.SearchingForDriver -> searchingForDriverState()
             is PassengerDashboardUiState.PassengerPickUp -> passengerPickUp(uiState)
             is PassengerDashboardUiState.EnRoute -> enRoute(uiState)
             is PassengerDashboardUiState.Arrived -> arrived(uiState)

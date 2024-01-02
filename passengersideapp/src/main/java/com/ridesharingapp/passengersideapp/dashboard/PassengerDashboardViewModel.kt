@@ -66,7 +66,7 @@ class PassengerDashboardViewModel(
     ) ->
         val isMapReady = true
         if (rideResult is ServiceResult.Failure) {
-            Log.e("PassengerDashboardViewModel", "uiState:map:rideResult is failure ${passenger?.email} $isMapReady", rideResult.exception)
+            Log.e("PassengerDashboardViewModel", "error caught in ride model state flow", rideResult.exception)
             return@map PassengerDashboardUiState.Error
         }
 
@@ -78,51 +78,62 @@ class PassengerDashboardViewModel(
             when {
                 ride == null -> PassengerDashboardUiState.RideInactive
 
-                ride.driverId == null -> PassengerDashboardUiState.SearchingForDriver(
-                    ride.passengerLatitude,
-                    ride.passengerLongitude,
-                    ride.destinationAddress
-                )
+                ride.driverId == null -> {
+                    Log.d(TAG, "Current State: Searching for driver")
+                    PassengerDashboardUiState.SearchingForDriver(
+                        ride.passengerLatitude,
+                        ride.passengerLongitude,
+                        ride.destinationAddress
+                    )
+                }
 
                 ride.status == RideStatus.PASSENGER_PICK_UP.value
                         && ride.driverLatitude != null
-                        && ride.driverLongitude != null -> PassengerDashboardUiState.PassengerPickUp(
-                    passengerLat = ride.passengerLatitude,
-                    passengerLon = ride.passengerLongitude,
-                    driverLat = ride.driverLatitude!!,
-                    driverLon = ride.driverLongitude!!,
-                    destinationLat = ride.destinationLatitude,
-                    destinationLon = ride.destinationLongitude,
-                    destinationAddress = ride.destinationAddress,
-                    driverName = ride.driverName ?: "Error",
-                    driverAvatar = ride.driverAvatarUrl ?: "",
-                )
-
+                        && ride.driverLongitude != null -> {
+                    Log.d(TAG, "Current State: Driver has picked up the ride")
+                    PassengerDashboardUiState.PassengerPickUp(
+                        passengerLat = ride.passengerLatitude,
+                        passengerLon = ride.passengerLongitude,
+                        driverLat = ride.driverLatitude!!,
+                        driverLon = ride.driverLongitude!!,
+                        destinationLat = ride.destinationLatitude,
+                        destinationLon = ride.destinationLongitude,
+                        destinationAddress = ride.destinationAddress,
+                        driverName = ride.driverName ?: "Error",
+                        driverAvatar = ride.driverAvatarUrl ?: "",
+                    )
+                }
                 ride.status == RideStatus.EN_ROUTE.value
                         && ride.driverLatitude != null
-                        && ride.driverLongitude != null -> PassengerDashboardUiState.EnRoute(
-                    passengerLat = ride.passengerLatitude,
-                    passengerLon = ride.passengerLongitude,
-                    driverName = ride.driverName ?: "Error",
-                    destinationAddress = ride.destinationAddress,
-                    destinationLat = ride.destinationLatitude,
-                    destinationLon = ride.destinationLongitude,
-                    driverAvatar = ride.driverAvatarUrl ?: "",
-                    driverLat = ride.driverLatitude!!,
-                    driverLon = ride.driverLongitude!!
-                )
+                        && ride.driverLongitude != null -> {
+                    Log.d(TAG, "Current state: Driver is en route")
+                    PassengerDashboardUiState.EnRoute(
+                        passengerLat = ride.passengerLatitude,
+                        passengerLon = ride.passengerLongitude,
+                        driverName = ride.driverName ?: "Error",
+                        destinationAddress = ride.destinationAddress,
+                        destinationLat = ride.destinationLatitude,
+                        destinationLon = ride.destinationLongitude,
+                        driverAvatar = ride.driverAvatarUrl ?: "",
+                        driverLat = ride.driverLatitude!!,
+                        driverLon = ride.driverLongitude!!
+                    )
+                }
 
                 ride.status == RideStatus.ARRIVED.value
                         && ride.driverLatitude != null
-                        && ride.driverLongitude != null -> PassengerDashboardUiState.Arrived(
-                    passengerLat = ride.passengerLatitude,
-                    passengerLon = ride.passengerLongitude,
-                    driverName = ride.driverName ?: "Error",
-                    destinationLat = ride.destinationLatitude,
-                    destinationLon = ride.destinationLongitude,
-                    destinationAddress = ride.destinationAddress,
-                    driverAvatar = ride.driverAvatarUrl ?: "",
-                )
+                        && ride.driverLongitude != null -> {
+                    Log.d(TAG, "Current state: Driver has arrived")
+                    PassengerDashboardUiState.Arrived(
+                        passengerLat = ride.passengerLatitude,
+                        passengerLon = ride.passengerLongitude,
+                        driverName = ride.driverName ?: "Error",
+                        destinationLat = ride.destinationLatitude,
+                        destinationLon = ride.destinationLongitude,
+                        destinationAddress = ride.destinationAddress,
+                        driverAvatar = ride.driverAvatarUrl ?: "",
+                    )
+                }
 
                 (ride.status == RideStatus.PASSENGER_PICK_UP.value
                         || ride.status == RideStatus.EN_ROUTE.value
@@ -137,7 +148,7 @@ class PassengerDashboardViewModel(
                 }
 
                 else -> {
-                    Log.e("ELSE", "${passenger}, $ride")
+                    Log.e("PassengerDashboardViewModel", "Unexpected state: passenger=$passenger, ride=$ride")
                     PassengerDashboardUiState.Error
                 }
             }
@@ -157,16 +168,19 @@ class PassengerDashboardViewModel(
         val getUser = getUser.getUser()
         when (getUser) {
             is ServiceResult.Failure -> {
-                Log.e("PassengerDashboardViewModel", "getPassenger failed", getUser.exception)
+                Log.e("PassengerDashboardViewModel", "getPassenger: failed", getUser.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
             is ServiceResult.Value -> {
                 if (getUser.value == null) {
-                    Log.e("PassengerDashboardViewModel", "getPassenger null user")
+                    Log.d("PassengerDashboardViewModel", "getPassenger: null user")
                     sendToLogin()
                 }
-                else getActiveRideIfItExists(getUser.value!!)
+                else {
+                    Log.d("PassengerDashboardViewModel", "getPassenger: success")
+                    getActiveRideIfItExists(getUser.value!!)
+                }
             }
         }
     }
@@ -176,14 +190,20 @@ class PassengerDashboardViewModel(
 
         when (result) {
             is ServiceResult.Failure -> {
-                Log.e("PassengerDashboardViewModel", "getActiveRideIfItExists failed", result.exception)
+                Log.e("PassengerDashboardViewModel", "getActiveRideIfItExists: failed", result.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
             is ServiceResult.Value -> {
                 //if null, no active ride exists
-                if (result.value == null) _passengerModel.value = user
-                else observeRideModel(result.value!!, user)
+                if (result.value == null) {
+                    Log.d("PassengerDashboardViewModel", "getActiveRideIfItExists: no current ride in progress")
+                    _passengerModel.value = user
+                }
+                else {
+                    Log.d("PassengerDashboardViewModel", "getActiveRideIfItExists: success")
+                    observeRideModel(result.value!!, user)
+                }
             }
         }
     }
@@ -196,6 +216,7 @@ class PassengerDashboardViewModel(
      */
     private suspend fun observeRideModel(rideId: String, user: GrabLamUser) {
         //The result of this call is handled inside the flowable assigned to _rideModel
+        Log.d("PassengerDashboardViewModel", "started observe ride $rideId")
         rideService.observeRideById(rideId)
         _passengerModel.value = user
     }
@@ -243,11 +264,12 @@ class PassengerDashboardViewModel(
 
         when (result) {
             is ServiceResult.Failure -> {
-                Log.w("PassengerDashboardViewModel", "attempToCreateNewRide failed", result.exception)
+                Log.w("PassengerDashboardViewModel", "attemptToCreateNewRide failed", result.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
             is ServiceResult.Value -> {
 //                _autoCompleteList.value = emptyList()
+                Log.d(TAG, "attemptToCreateNewRide: success")
                 observeRideModel(result.value, _passengerModel.value!!)
             }
         }
@@ -281,7 +303,9 @@ class PassengerDashboardViewModel(
             }
 
             //State should automatically be handled by the flow
-            is ServiceResult.Value -> Unit
+            is ServiceResult.Value -> {
+                Log.d(TAG, "cancelRide: success")
+            }
         }
     }
 
@@ -336,9 +360,16 @@ class PassengerDashboardViewModel(
         val currentRide = _rideModel.first()
 
         if (currentRide is ServiceResult.Value && currentRide.value != null) {
+            Log.d(TAG, "get current chat channel successfully")
             backstack.setHistory(
                 History.of(ChatKey(currentRide.value!!.rideId)),
                 StateChange.FORWARD
+            )
+        } else {
+            Log.e(
+                TAG, "failed to get current chat channel",
+                if (currentRide is ServiceResult.Failure) currentRide.exception
+                else Exception("null channel")
             )
         }
     }
@@ -350,5 +381,9 @@ class PassengerDashboardViewModel(
             History.of(ProfileSettingsKey()),
             StateChange.FORWARD
         )
+    }
+
+    companion object {
+        val TAG = PassengerDashboardViewModel::class.simpleName
     }
 }
