@@ -1,6 +1,7 @@
 package com.ridesharingapp.passengersideapp.authentication.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ class LoginFragment : Fragment() {
     private val viewModel by lazy { lookup<LoginViewModel>()}
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        Log.d("LoginFragment", "onCreateView")
         viewModel.toastHandler = {
             handleToast(it)
         }

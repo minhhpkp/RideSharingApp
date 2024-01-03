@@ -1,8 +1,5 @@
 package com.ridesharingapp.driversideapp.authentication.signup
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.services.SignUpResult
 import com.ridesharingapp.common.uicommon.ToastMessages
@@ -15,6 +12,10 @@ import com.zhuinden.simplestack.StateChange
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 class SignUpViewModel(
@@ -23,30 +24,31 @@ class SignUpViewModel(
 ) : ScopedServices.Activated, CoroutineScope {
     internal var toastHandler: ((ToastMessages) -> Unit)? = null
 
-    var email by mutableStateOf("")
-        private set
-
+    private val _email = MutableStateFlow("")
+    val email: StateFlow<String> = _email.asStateFlow()
     fun updateEmail(input: String) {
-        email = input
+        _email.update { input }
     }
 
-    var name by mutableStateOf("")
-        private set
-
+    private val _name = MutableStateFlow("")
+    val name: StateFlow<String> = _name.asStateFlow()
     fun updateName(input: String) {
-        name = input
+        _name.update { input }
     }
 
-    var password by mutableStateOf("")
-        private set
-
+    private val _password = MutableStateFlow("")
+    val password: StateFlow<String> = _password.asStateFlow()
     fun updatePassword(input: String) {
-        password = input
+        _password.update { input }
     }
 
+    private val _showLoading = MutableStateFlow(false)
+    val showLoading: StateFlow<Boolean> = _showLoading.asStateFlow()
 
     fun handleSignUp() = launch(Dispatchers.Main) {
-        val signupAttempt = signUp.signUpUser(email, password, name)
+        _showLoading.update { true }
+        val signupAttempt = signUp.signUpUser(_email.value, _password.value, _name.value)
+        _showLoading.update { false }
         when (signupAttempt) {
             is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             is ServiceResult.Value -> {

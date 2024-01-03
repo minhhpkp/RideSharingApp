@@ -1,6 +1,7 @@
 package com.ridesharingapp.common.services
 
 import android.util.Log
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -58,7 +59,11 @@ class FirebaseAuthService(
                 ServiceResult.Failure(Exception("Null user"))
             }
         } catch (exception: Exception) {
-            when (exception) {
+            Log.d("FirebaseAuthService", "exception type is ${exception::class.simpleName} ${exception.message} ${exception.cause}")
+            if (exception is FirebaseException && exception.message?.contains("INVALID_LOGIN_CREDENTIALS") == true) {
+                ServiceResult.Value(LogInResult.InvalidCredentials)
+            }
+            else when (exception) {
                 is FirebaseAuthInvalidUserException -> ServiceResult.Value(LogInResult.InvalidCredentials)
                 is FirebaseAuthInvalidCredentialsException -> ServiceResult.Value(LogInResult.InvalidCredentials)
                 else -> ServiceResult.Failure(exception)

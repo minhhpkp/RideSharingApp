@@ -1,4 +1,4 @@
-package com.ridesharingapp.driversideapp.authentication.login
+package com.ridesharingapp.passengersideapp.authentication.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -25,31 +26,79 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.style.color_primary
 import com.ridesharingapp.common.style.color_white
 import com.ridesharingapp.common.style.typography
 import com.ridesharingapp.common.uicommon.AppHeader
+import com.ridesharingapp.driversideapp.authentication.login.LoginViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel
 ) {
+    val clearingPrevLogin by viewModel.clearingPrevLogin.collectAsStateWithLifecycle()
+    val loginInProcess by viewModel.loginInProcess.collectAsStateWithLifecycle()
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val password by viewModel.password.collectAsStateWithLifecycle()
+    LoginScreen(
+        showLoading = clearingPrevLogin || loginInProcess,
+        email = email,
+        updateEmail = { newEmail -> viewModel.updateEmail(newEmail) },
+        password = password,
+        updatePassword = { newPassword -> viewModel.updatePassword(newPassword) },
+        handleLogin = { viewModel.handleLogin() },
+        goToSignUp = { viewModel.goToSignup() }
+    )
+}
+
+@Composable
+fun LoginScreen(
+    showLoading: Boolean,
+    email: String,
+    updateEmail: ((String) -> Unit),
+    password: String,
+    updatePassword: ((String) -> Unit),
+    handleLogin: () -> Unit,
+    goToSignUp: () -> Unit
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        if (viewModel.clearingPrevLogin || viewModel.loginInProcess)
-            CircularProgressIndicator()
+        if (showLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.loading),
+                    style = TextStyle(fontSize = 18.sp)
+                )
+                CircularProgressIndicator()
+            }
+        }
         else {
             Column(
                 modifier = Modifier
@@ -66,22 +115,24 @@ fun LoginScreen(
 
                 EmailInputField(
                     modifier = Modifier.padding(top = 16.dp),
-                    viewModel = viewModel
+                    updateEmail = updateEmail,
+                    email = email
                 )
 
                 PasswordInputField(
                     modifier = Modifier.padding(top = 16.dp),
-                    viewModel = viewModel
+                    password = password,
+                    updatePassword = updatePassword
                 )
 
                 LoginContinueButton(
                     modifier = Modifier.padding(top = 32.dp),
-                    handleLogin = { viewModel.handleLogin() }
+                    handleLogin = { handleLogin() }
                 )
 
                 SignupText(
                     modifier = Modifier.padding(top = 32.dp),
-                    viewModel = viewModel
+                    goToSignUp = goToSignUp
                 )
             }
         }
@@ -91,16 +142,21 @@ fun LoginScreen(
 @Composable
 fun EmailInputField(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel
+    email: String,
+    updateEmail: (String) -> Unit
 ) {
 
     OutlinedTextField(
         modifier = modifier,
-        value = viewModel.email,
+        value = email,
         onValueChange = {
-            viewModel.updateEmail(it)
+            updateEmail(it)
         },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(
+            keyboardType =  KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true,
         label = { Text(text = stringResource(id = R.string.email)) }
     )
 }
@@ -108,19 +164,27 @@ fun EmailInputField(
 @Composable
 fun PasswordInputField(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel
+    password: String,
+    updatePassword: (String) -> Unit
 ) {
-
+    val localFocusManager = LocalFocusManager.current
     var showPassword by rememberSaveable { mutableStateOf(false) }
 
     OutlinedTextField(
         modifier = modifier,
-        value = viewModel.password,
+        value = password,
         onValueChange = {
-            viewModel.updatePassword(it)
+            updatePassword(it)
         },
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions{
+            localFocusManager.clearFocus()
+        },
+        singleLine = true,
         label = { Text(text = stringResource(id = R.string.password)) },
         trailingIcon = {
             val image = if (showPassword)
@@ -158,11 +222,11 @@ fun LoginContinueButton(
 @Composable
 fun SignupText(
     modifier: Modifier,
-    viewModel: LoginViewModel
+    goToSignUp: () -> Unit
 ) {
     TextButton(
         modifier = modifier,
-        onClick = { viewModel.goToSignup() }) {
+        onClick = { goToSignUp() }) {
         Text(
             style = typography.subtitle2,
             text = buildAnnotatedString {
@@ -181,4 +245,18 @@ fun SignupText(
             }
         )
     }
+}
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(
+        showLoading = false,
+        email = "some@email.com",
+        updateEmail = {},
+        password = "123456",
+        updatePassword = {},
+        handleLogin = {},
+        goToSignUp = {}
+    )
 }
