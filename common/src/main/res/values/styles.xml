@@ -10,4 +10,9 @@
         <item name="strokeColor">@color/color_light_grey</item>
         <item name="cornerRadius">4dp</item>
     </style>
+
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/quantum_grey</item>
+        <item name="colorControlActivated">@color/colorGoldenYellow</item>
+    </style>
 </resources>

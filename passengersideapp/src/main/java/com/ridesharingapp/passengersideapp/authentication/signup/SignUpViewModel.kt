@@ -2,6 +2,7 @@ package com.ridesharingapp.passengersideapp.authentication.signup
 
 import android.util.Log
 import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.keys.TYPE_PASSENGER
 import com.ridesharingapp.common.services.SignUpResult
 import com.ridesharingapp.common.uicommon.ToastMessages
 import com.ridesharingapp.common.usecases.SignUpUser
@@ -49,7 +50,7 @@ class SignUpViewModel(
 
     fun handleSignUp() = launch(Dispatchers.Main) {
         _showLoading.update { true }
-        val signupAttempt = signUp.signUpUser(_email.value, _password.value, _name.value)
+        val signupAttempt = signUp.signUpUser(_email.value, _password.value, _name.value, TYPE_PASSENGER)
         _showLoading.update { false }
         when (signupAttempt) {
             is ServiceResult.Failure -> {

@@ -1,6 +1,8 @@
 package com.ridesharingapp.common.services
 
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.domain.Ride
@@ -20,6 +22,9 @@ import com.ridesharingapp.common.keys.KEY_PASSENGER_ID
 import com.ridesharingapp.common.keys.KEY_PASSENGER_LAT
 import com.ridesharingapp.common.keys.KEY_PASSENGER_LON
 import com.ridesharingapp.common.keys.KEY_PASSENGER_NAME
+import com.ridesharingapp.common.keys.KEY_PICK_UP_ADDRESS
+import com.ridesharingapp.common.keys.KEY_PICK_UP_LAT
+import com.ridesharingapp.common.keys.KEY_PICK_UP_LONG
 import com.ridesharingapp.common.keys.KEY_STATUS
 import com.ridesharingapp.common.keys.STREAM_CHANNEL_TYPE_LIVESTREAM
 import io.getstream.chat.android.client.ChatClient
@@ -40,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Date
 
@@ -76,12 +82,13 @@ class StreamRideService(
             }
             val result = channelClient.addMembers(listOf(currentID)).await()
 
+
             if (result.isSuccess) {
                 observeChannelEvents(channelClient)
                 Log.d("StreamRideService", "observeRideById: add self successfully")
 
                 result.onSuccessSuspend { channel ->
-                    Log.d("StreamRideService", "observeRideById: emitted ride to rideModelUpdates flow")
+                    Log.d("StreamRideService", "observeRideById: emitted ride to rideModelUpdates flow status=${channel.extraData[KEY_STATUS]}")
                     _rideModelUpdates.emit(
                         ServiceResult.Value(
                             streamChannelToRide(channel)
@@ -113,20 +120,38 @@ class StreamRideService(
         channelClient.subscribe { event: ChatEvent ->
             when (event) {
                 is ChannelDeletedEvent -> {
-                    Log.d("StreamRideService", "observeChannelEvents: channel ${event.channelId} deleted event caught")
-                    _rideModelUpdates.value = ServiceResult.Value(null)
+                    if (_rideModelUpdates.value is ServiceResult.Value) {
+                        val ride = (_rideModelUpdates.value as ServiceResult.Value<Ride?>).value
+                        if (ride != null && ride.status == RideStatus.ARRIVED.value) {
+                            Log.d("StreamRideService", "observeChannelEvents:ChannelDeletedEvent:" +
+                                    " ride ${event.channelId} is pending rating")
+                            CoroutineScope(Dispatchers.Main).launch {
+                                _rideModelUpdates.emit(
+                                    ServiceResult.Value(
+                                        ride.copy(
+                                            status = RideStatus.PENDING_RATING.value
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        Log.d("StreamRideService", "observeChannelEvents:ChannelDeletedEvent:" +
+                            " ride ${event.channelId} is cancelled before arrival")
+                        _rideModelUpdates.value = ServiceResult.Value(null)
+                    }
                 }
 
                 is ChannelUpdatedEvent -> {
                     _rideModelUpdates.value =
                         ServiceResult.Value(streamChannelToRide(event.channel))
-                    Log.d("StreamRideService", "observeChannelEvents: channel ${event.channelId} updated event caught")
+                    Log.d("StreamRideService", "observeChannelEvents: channel ${event.channelId} updated event caught status=${event.channel.extraData[KEY_STATUS]}")
                 }
 
                 is ChannelUpdatedByUserEvent -> {
                     _rideModelUpdates.value =
                         ServiceResult.Value(streamChannelToRide(event.channel))
-                    Log.d("StreamRideService", "observeChannelEvents: channel ${event.channelId} updated by user event caught")
+                    Log.d("StreamRideService", "observeChannelEvents: channel ${event.channelId} updated event caught status=${event.channel.extraData[KEY_STATUS]}")
                 }
 
                 is NewMessageEvent -> {
@@ -180,6 +205,10 @@ class StreamRideService(
         val driverAvatar: String? = extraData[KEY_DRIVER_AVATAR_URL] as String?
         val driverName: String? = extraData[KEY_DRIVER_NAME] as String?
 
+        val pickUpAddress: String? = extraData[KEY_PICK_UP_ADDRESS] as String?
+        val pickUpLat: Double? = extraData[KEY_PICK_UP_LAT] as Double?
+        val pickUpLong: Double? = extraData[KEY_PICK_UP_LONG] as Double?
+
         val passengerId: String? = extraData[KEY_PASSENGER_ID] as String?
         val passengerLat: Double? = extraData[KEY_PASSENGER_LAT] as Double?
         val passengerLon: Double? = extraData[KEY_PASSENGER_LON] as Double?
@@ -200,6 +229,9 @@ class StreamRideService(
             driverLongitude = driverLon,
             driverName = driverName,
             driverAvatarUrl = driverAvatar,
+            pickUpAddress = pickUpAddress ?: "",
+            pickUpLatitude = pickUpLat ?: 999.0,
+            pickUpLongitude = pickUpLong ?: 999.0,
             passengerId = passengerId ?: "",
             passengerLatitude = passengerLat ?: 999.0,
             passengerLongitude = passengerLon ?: 999.0,
@@ -240,29 +272,29 @@ class StreamRideService(
                     client.channel(channel.cid).let { channelClient ->
                         channelClient.subscribe { event ->
                             if (event is ChannelDeletedEvent) {
-                                Log.d(
+                                /*Log.d(
                                     "StreamRideService",
                                     "open ride channel ${channel.cid} being observed is deleted"
-                                )
+                                )*/
                                 deleteFromOpenRidesList(channel.cid)
                             } else if (event is ChannelUpdatedEvent
                                 && event.channel.extraData[KEY_STATUS] != null
                                 && event.channel.extraData[KEY_STATUS] != RideStatus.SEARCHING_FOR_DRIVER
                             ) {
-                                Log.d(
+                               /* Log.d(
                                     "StreamRideService",
                                     "open ride channel ${channel.cid} has been taken"
-                                )
+                                )*/
                                 deleteFromOpenRidesList(channel.cid)
                             } else if (
                                 event is ChannelUpdatedByUserEvent
                                 && event.channel.extraData[KEY_STATUS] != null
                                 && event.channel.extraData[KEY_STATUS] != RideStatus.SEARCHING_FOR_DRIVER
                             ) {
-                                Log.d(
+                                /*Log.d(
                                     "StreamRideService",
                                     "open ride channel ${channel.cid} has been taken"
-                                )
+                                )*/
                                 deleteFromOpenRidesList(channel.cid)
                             }
                         }
@@ -282,7 +314,7 @@ class StreamRideService(
                 if (_openRides.value is ServiceResult.Value) {
                     val currentList = (_openRides.value as ServiceResult.Value<List<Ride>>).value.toMutableList()
                     currentList.removeIf { it.rideId == cid }
-                    Log.d("StreamRideService", "updated list of open rides: ${currentList.map{ride -> ride.rideId}}")
+//                    Log.d("StreamRideService", "updated list of open rides: ${currentList.map{ride -> ride.rideId}}")
                     _openRides.emit(ServiceResult.Value(currentList))
                 }
             }
@@ -367,7 +399,8 @@ class StreamRideService(
         passengerAvatarUrl: String,
         destinationAddress: String,
         destLat: Double,
-        destLon: Double
+        destLon: Double,
+        pickUpAddress: String
     ): ServiceResult<String> = withContext(Dispatchers.IO) {
 
         val channelId = generateUniqueId(6, ('A'..'Z') + ('0'..'9'))
@@ -384,7 +417,10 @@ class StreamRideService(
                 KEY_PASSENGER_AVATAR_URL to passengerAvatarUrl,
                 KEY_DEST_ADDRESS to destinationAddress,
                 KEY_DEST_LAT to destLat,
-                KEY_DEST_LON to destLon
+                KEY_DEST_LON to destLon,
+                KEY_PICK_UP_ADDRESS to pickUpAddress,
+                KEY_PICK_UP_LAT to passengerLat,
+                KEY_PICK_UP_LONG to passengerLon
             )
         ).await()
 
@@ -422,21 +458,42 @@ class StreamRideService(
             ) {
                 Log.e("StreamRideService", "cancelRide: no current ride in progress")
                 ServiceResult.Failure(Exception("Failed to retrieve channel for cancellation"))
-            }
-            else {
-                Log.d("StreamRideService", "cancelRide: get ride in progress successfully, rideId=${result.data().first().cid}")
+            } else {
+                Log.d(
+                    "StreamRideService",
+                    "cancelRide: get ride in progress successfully, rideId=${
+                        result.data().first().cid
+                    }"
+                )
                 val channelClient = client.channel(result.data().first().cid)
 
                 if (channelClient.hide().await().isSuccess) {
-                    Log.d("StreamRideService", "cancelRide: hide the channel ${channelClient.channelId} successfully")
+                    Log.d(
+                        "StreamRideService",
+                        "cancelRide: hide the channel ${channelClient.channelId} successfully"
+                    )
                     val deleteResult = channelClient.delete().await()
 //                    observeOpenRides()
                     if (deleteResult.isSuccess) {
-                        Log.d("StreamRideService", "cancelRide: delete the channel ${channelClient.channelId} successfully")
-                        _rideModelUpdates.emit(ServiceResult.Value(null))
+                        Log.d(
+                            "StreamRideService",
+                            "cancelRide: delete the channel ${channelClient.channelId} successfully"
+                        )
+                        val ride = (_rideModelUpdates.value as ServiceResult.Value<Ride?>).value
+                        _rideModelUpdates.emit(
+                            ServiceResult.Value(
+                                if (ride != null && ride.status == RideStatus.ARRIVED.value) {
+                                    ride.copy(status = RideStatus.PENDING_RATING.value)
+                                } else null
+                            )
+                        )
                         ServiceResult.Value(Unit)
                     } else {
-                        Log.e("StreamRideService", "cancelRide: failed to delete the channel", deleteResult.error().cause)
+                        Log.e(
+                            "StreamRideService",
+                            "cancelRide: failed to delete the channel",
+                            deleteResult.error().cause
+                        )
                         ServiceResult.Failure(Exception(deleteResult.error().cause))
                     }
                 } else {
@@ -445,15 +502,19 @@ class StreamRideService(
                 }
             }
         } else {
-            Log.e("StreamRideService", "cancelRide: failed to get ride in progress", result.error().cause)
+            Log.e(
+                "StreamRideService",
+                "cancelRide: failed to get ride in progress",
+                result.error().cause
+            )
             ServiceResult.Failure(Exception(result.error().cause))
         }
+
     }
 
     override suspend fun completeRide(ride: Ride): ServiceResult<Unit> {
         val channelClient = client.channel(ride.rideId)
         channelClient.delete().await()
-//        observeOpenRides()
         return ServiceResult.Value(Unit)
     }
 
@@ -562,4 +623,75 @@ class StreamRideService(
     //just the channel id.
     private fun getChannelIdOnly(cid: String): String = cid.split(":").last()
 
+    override suspend fun saveRide(ride: Ride): ServiceResult<String> {
+        // debug code:
+//        Log.d("StreamRideService", "saveRide called ride=${ride.rideId}")
+//        return ServiceResult.Value("some ride id")
+
+        val db = Firebase.firestore
+//        val passengerRef = db.collection("Users").document(ride.passengerId)
+//        val driverRef = db.collection("Users").document(ride.driverId!!)
+
+        val rideDoc = mapOf(
+            "Passenger" to ride.passengerId,
+            "Driver" to ride.driverId,
+            "Pick up address" to ride.pickUpAddress,
+            "Pick up latitude" to ride.pickUpLatitude,
+            "Pick up longitude" to ride.pickUpLongitude,
+            "Destination address" to ride.destinationAddress,
+            "Destination latitude" to ride.destinationLatitude,
+            "Destination longitude" to ride.destinationLongitude,
+            // dev work around
+            "Fee" to 40.25,
+            "Earned points" to 1,
+            "Rating" to null
+        )
+
+        val addRide = db.collection("Rides").add(rideDoc)
+            .addOnSuccessListener {
+                Log.d("StreamRideService", "save ride ${ride.rideId} successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.e("StreamRideSerivce", "failed to save ride ${ride.rideId}", e)
+                Log.w("StreamRideSerivce", "ride ${ride.rideId} details:\n" +
+                        "pickup_lat=${ride.pickUpLatitude}\n" +
+                        "pickup_long=${ride.pickUpLongitude}\n" +
+                        "dest_lat=${ride.destinationLatitude}\n" +
+                        "dest_long=${ride.destinationLongitude}")
+            }
+            .await()
+        return if (addRide != null) {
+            ServiceResult.Value(addRide.id)
+        } else {
+            ServiceResult.Failure(Exception("Unable to save ride ${ride.rideId}"))
+        }
+    }
+
+    override suspend fun sendRating(rideId: String, rating: Float): ServiceResult<Unit> {
+        clearRideModel()
+
+        // debug code
+//        Log.d("StreamRideSerivce", "sendRating called, rideId=$rideId, rating=$rating")
+//        return ServiceResult.Value(Unit)
+
+        return withContext(Dispatchers.IO) {
+            val docRef = Firebase.firestore.collection("Rides").document(rideId)
+            docRef.update("Rating", rating)
+                .addOnSuccessListener { Log.d("StreamRideService", "update rating successfully") }
+                .addOnFailureListener { Log.e("StreamRideService", "failed to update rating", it) }
+                .await()
+            val check = docRef.get().await()
+            if (check.get("Rating") == rating) {
+                ServiceResult.Value(Unit)
+            } else {
+                ServiceResult.Failure(Exception("Unable to update rating"))
+            }
+        }
+    }
+
+    override suspend fun clearRideModel() {
+        _rideModelUpdates.emit(
+            ServiceResult.Value(null)
+        )
+    }
 }

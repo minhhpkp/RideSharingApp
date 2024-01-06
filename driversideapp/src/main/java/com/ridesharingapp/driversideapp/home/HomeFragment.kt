@@ -95,6 +95,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.complete)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -136,6 +137,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -147,6 +149,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
 
             advanceLayout.advanceButton.setImageResource(R.drawable.ic_arrival)
             advanceLayout.advanceButton.setOnLongClickListener {
+//                viewModel.saveRide()
                 viewModel.advanceRide()
                 true
             }
@@ -181,6 +184,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -229,7 +233,6 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             rideLayout.visibility = View.GONE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.VISIBLE
-
 
             if (passengerList.adapter == null) {
                 passengerList.adapter = PassengerListAdapter().apply {

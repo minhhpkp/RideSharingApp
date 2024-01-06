@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -35,6 +36,8 @@ class PassengerDashboardViewModel(
 //    , val googleService: com.ridesharingapp.common.google.GoogleService
 ) : ScopedServices.Activated, CoroutineScope {
 
+    private val _savedRideId: MutableStateFlow<String?> = MutableStateFlow(null)
+
     private val canceller = Job()
 
     override val coroutineContext: CoroutineContext
@@ -46,6 +49,11 @@ class PassengerDashboardViewModel(
     private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
 //    private val _mapIsReady = MutableStateFlow(false)
     private val _currentMessagesCount = MutableStateFlow(0)
+
+    private val _ratingModel = MutableStateFlow(PassengerDashboardUiState.Rating())
+    fun updateRating(rating: Float) {
+        _ratingModel.update { it.copy(rating = rating) }
+    }
 
     /*
     Different UI states:
@@ -61,8 +69,10 @@ class PassengerDashboardViewModel(
         _passengerModel,
         _rideModel,
 //        _mapIsReady
+        _ratingModel
     ).map { (passenger, rideResult
 //                                      , isMapReady
+        ,ratingModel
     ) ->
         val isMapReady = true
         if (rideResult is ServiceResult.Failure) {
@@ -133,6 +143,10 @@ class PassengerDashboardViewModel(
                         destinationAddress = ride.destinationAddress,
                         driverAvatar = ride.driverAvatarUrl ?: "",
                     )
+                }
+
+                ride.status == RideStatus.PENDING_RATING.value -> {
+                    ratingModel
                 }
 
                 (ride.status == RideStatus.PASSENGER_PICK_UP.value
@@ -259,7 +273,8 @@ class PassengerDashboardViewModel(
 //            passengerLat = passengerLatLng.lat,
 //            passengerLon = passengerLatLng.lng
             passengerLat = lat,
-            passengerLon = lng
+            passengerLon = lng,
+            pickUpAddress = ""
         )
 
         when (result) {
@@ -294,11 +309,11 @@ class PassengerDashboardViewModel(
     }*/
 
     fun cancelRide() = launch(Dispatchers.Main) {
-        val cancelRide = rideService.cancelRide()
-        when (cancelRide) {
+        when (val cancelRide = rideService.cancelRide()) {
             is ServiceResult.Failure -> {
                 Log.e("PassengerDashboardViewModel", "cancelRide failed", cancelRide.exception)
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
+                rideService.clearRideModel()
                 sendToSplash()
             }
 
@@ -325,6 +340,23 @@ class PassengerDashboardViewModel(
 
     override fun onServiceActive() {
         getPassenger()
+
+        launch(Dispatchers.IO) {
+            _rideModel
+                .distinctUntilChanged()
+                .collect { rideModel ->
+                    if (rideModel is ServiceResult.Value) {
+                        val ride = rideModel.value
+                        if (ride != null && ride.status == RideStatus.ARRIVED.value) {
+                            val saveResult = rideService.saveRide(ride)
+                            if (saveResult is ServiceResult.Value) {
+                                _savedRideId.value = saveResult.value
+                                Log.d(TAG, "ride ${ride.rideId} saved")
+                            }
+                        }
+                    }
+                }
+        }
     }
 
     override fun onServiceInactive() {
@@ -381,6 +413,18 @@ class PassengerDashboardViewModel(
             History.of(ProfileSettingsKey()),
             StateChange.FORWARD
         )
+    }
+
+    fun sendRating() {
+        launch(Dispatchers.Main) {
+            rideService.sendRating(_savedRideId.value!!, _ratingModel.value.rating)
+        }
+    }
+
+    fun skipRating() {
+        launch(Dispatchers.Main) {
+            rideService.clearRideModel()
+        }
     }
 
     companion object {

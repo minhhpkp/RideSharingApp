@@ -95,4 +95,16 @@
     <!--    driver side string by Nam-->
     <string name="cancel_ride">Hủy chuyến</string>
     <string name="reload">Tải lại danh sách</string>
+    <string name="complete">Hoàn tất</string>
+
+    <!--    for rating screen    -->
+    <string name="how_would_you_rate_the_ride">Bạn đánh giá chuyến đi này như thế nào?</string>
+    <string name="very_horrible">Rất tệ</string>
+    <string name="horrible">Tệ</string>
+    <string name="pretty_horrible">Khá tệ</string>
+    <string name="alright">Ổn</string>
+    <string name="good">Tốt</string>
+    <string name="very_good">Rất tốt</string>
+    <string name="skip">Bỏ qua</string>
+    <string name="continue_text">Tiếp tục</string>
 </resources>

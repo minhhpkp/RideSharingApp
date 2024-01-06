@@ -57,18 +57,29 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             handleToast(it)
         }
 
-        //This button is reused in most states so we add the listener here
-        binding.mapLayout.cancelButton.setOnClickListener { viewModel.cancelRide() }
-        binding.chatButton.setOnClickListener {
-            viewModel.openChat()
-        }
-        binding.toolbar.profileIcon.setOnClickListener {
-            viewModel.goToProfile()
-        }
-        binding.destinationTitle.setOnClickListener {
-            viewModel.handleSearchItemClick(
-                AutoCompleteModel(address = "Some address", prediction = null)
-            )
+        binding.apply {
+            //This button is reused in most states so we add the listener here
+            mapLayout.cancelButton.setOnClickListener { viewModel.cancelRide() }
+            chatButton.setOnClickListener {
+                viewModel.openChat()
+            }
+            toolbar.profileIcon.setOnClickListener {
+                viewModel.goToProfile()
+            }
+            destinationTitle.setOnClickListener {
+                viewModel.handleSearchItemClick(
+                    AutoCompleteModel(address = "Some address", prediction = null)
+                )
+            }
+            ratingBar.setOnRatingBarChangeListener { _, rating, _ ->
+                viewModel.updateRating(rating)
+            }
+            continueButton.setOnClickListener {
+                viewModel.sendRating()
+            }
+            skipButton.setOnClickListener {
+                viewModel.skipRating()
+            }
         }
     }
 
@@ -90,10 +101,34 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             is PassengerDashboardUiState.PassengerPickUp -> passengerPickUp(uiState)
             is PassengerDashboardUiState.EnRoute -> enRoute(uiState)
             is PassengerDashboardUiState.Arrived -> arrived(uiState)
+            is PassengerDashboardUiState.Rating -> rating(uiState)
             is PassengerDashboardUiState.NewMessages -> updateMessageButton(uiState.totalMessages)
         }
 
 //        updateMap(uiState)
+    }
+
+    private fun rating(uiState: PassengerDashboardUiState.Rating) {
+        binding.apply {
+            ratingLayout.visibility = View.VISIBLE
+            searchingLayout.visibility = View.GONE
+            rideLayout.visibility = View.GONE
+            loadingView.loadingLayout.visibility = View.GONE
+
+//            ratingBar.rating = uiState.rating
+
+            ratingSubtitle.text = getString(
+                when (uiState.rating) {
+                    0.0f -> R.string.very_horrible
+                    1.0f -> R.string.horrible
+                    2.0f -> R.string.pretty_horrible
+                    3.0f -> R.string.alright
+                    4.0f -> R.string.good
+                    5.0f -> R.string.very_good
+                    else -> R.string.alright
+                }
+            )
+        }
     }
 
     private fun updateMessageButton(messageCount: Int) {
@@ -111,9 +146,11 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
     private fun arrived(uiState: PassengerDashboardUiState.Arrived) {
         binding.apply {
             rideLayout.visibility = View.VISIBLE
+            ratingLayout.visibility = View.GONE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
             rideComplete.rideCompleteLayout.visibility = View.VISIBLE
+            mapLayout.cancelButton.text = getString(R.string.complete)
 
             (requireActivity().application as RideSharingApp).service.showNotification("Bạn đã tới nơi", "", R.drawable.message)
 
@@ -153,9 +190,11 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
     private fun enRoute(uiState: PassengerDashboardUiState.EnRoute) {
         binding.apply {
+            ratingLayout.visibility = View.GONE
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             (requireActivity().application as RideSharingApp).service.showNotification("Tài xế của bạn đã đến điểm đón", "", R.drawable.message)
 
@@ -194,9 +233,11 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
     private fun passengerPickUp(uiState: PassengerDashboardUiState.PassengerPickUp) {
         binding.apply {
+            ratingLayout.visibility = View.GONE
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             (requireActivity().application as RideSharingApp).service.showNotification(
                 "Đã có tài xế nhận chuyến xe của bạn",
@@ -241,6 +282,8 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            ratingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             driverInfoLayout.visibility = View.GONE
             rideComplete.rideCompleteLayout.visibility = View.GONE
@@ -263,7 +306,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             rideLayout.visibility = View.GONE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.VISIBLE
-
+            ratingLayout.visibility = View.GONE
 
 //            if (autocompleteResults.adapter == null) {
 //                autocompleteResults.adapter = AutocompleteResultsAdapter().apply {

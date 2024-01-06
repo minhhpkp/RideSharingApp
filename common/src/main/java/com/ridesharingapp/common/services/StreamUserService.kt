@@ -152,16 +152,14 @@ class StreamUserService(
             disconnectUser(user.userId)
 
             delay(4000L)
-            val streamUser = user.let {
-                User(
-                    id = user.userId,
-                    name = user.username,
-                    extraData = mutableMapOf(
-                        KEY_STATUS to user.status,
-                        KEY_TYPE to user.type
-                    )
+            val streamUser = User(
+                id = user.userId,
+                name = user.username,
+                extraData = mutableMapOf(
+                    KEY_STATUS to user.status,
+                    KEY_TYPE to user.type
                 )
-            }
+            )
 
             val devToken = client.devToken(user.userId)
             val result = client.connectUser(streamUser, devToken).await()

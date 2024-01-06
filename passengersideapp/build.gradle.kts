@@ -56,12 +56,12 @@ android {
 
 dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    val navVersion = "2.7.5"
+    val navVersion = "2.7.6"
     val lifecycleVersion = "2.6.2"
 
     implementation("androidx.core:core-ktx:1.12.0")
 
-    implementation("androidx.activity:activity-compose:1.8.1")
+    implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
 
     testImplementation("junit:junit:4.13.2")
@@ -81,9 +81,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.4")
     implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("com.google.android.material:material:1.10.0")
+    implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.activity:activity-ktx:1.8.1")
+    implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -101,10 +101,8 @@ dependencies {
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("com.google.android.material:material:1.10.0")
+    implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.core:core:1.12.0")
-    implementation("androidx.activity:activity:1.8.1")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
 
 
@@ -113,7 +111,7 @@ dependencies {
 
     implementation(project(":common"))
 
-    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
@@ -121,7 +119,7 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
-    val simplestack_version = "2.2.5"
+    val simplestack_version = "2.3.3"
 
     implementation("com.github.Zhuinden.simple-stack-extensions:core-ktx:$simplestack_version")
     implementation("com.github.Zhuinden.simple-stack-extensions:fragments:$simplestack_version")
@@ -137,7 +135,7 @@ dependencies {
     implementation("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.libraries.places:places:3.2.0")
+    implementation("com.google.android.libraries.places:places:3.3.0")
     implementation("com.google.maps:google-maps-services:2.1.2")
     implementation("com.google.maps.android:android-maps-utils:3.3.0")
     implementation("org.slf4j:slf4j-simple:1.7.25")

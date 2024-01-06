@@ -2,6 +2,7 @@ package com.ridesharingapp.passengersideapp.authentication.login
 
 import android.util.Log
 import com.ridesharingapp.common.ServiceResult
+import com.ridesharingapp.common.keys.TYPE_PASSENGER
 import com.ridesharingapp.common.services.FirebaseAuthService
 import com.ridesharingapp.common.services.LogInResult
 import com.ridesharingapp.common.uicommon.ToastMessages
@@ -60,7 +61,7 @@ class LoginViewModel(
 
             _loginInProcess.update { true }
 
-            val loginAttempt = login.login(_email.value, _password.value)
+            val loginAttempt = login.login(_email.value, _password.value, TYPE_PASSENGER)
 
             _loginInProcess.update { false }
 

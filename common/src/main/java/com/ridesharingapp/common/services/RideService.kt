@@ -28,6 +28,7 @@ interface RideService {
         destinationAddress: String,
         destLat: Double,
         destLon: Double,
+        pickUpAddress: String
     ): ServiceResult<String>
 
     suspend fun cancelRide(): ServiceResult<Unit>
@@ -37,4 +38,10 @@ interface RideService {
 
     suspend fun updateDriverLocation(ride: Ride, lat: Double, lon: Double): ServiceResult<Unit>
     suspend fun updatePassengerLocation(ride:Ride, lat: Double, lon: Double): ServiceResult<Unit>
+
+    suspend fun saveRide(ride: Ride): ServiceResult<String>
+
+    suspend fun sendRating(rideId: String, rating: Float): ServiceResult<Unit>
+
+    suspend fun clearRideModel()
 }

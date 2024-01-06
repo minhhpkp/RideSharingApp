@@ -16,6 +16,10 @@ const val KEY_DRIVER_LON = "key_driver_lon"
 const val KEY_DRIVER_AVATAR_URL = "key_driver_avatar_url"
 const val KEY_DRIVER_NAME = "key_driver_NAME"
 
+const val KEY_PICK_UP_ADDRESS = "key_pick_up_address"
+const val KEY_PICK_UP_LAT = "key_pick_up_lat"
+const val KEY_PICK_UP_LONG = "key_pick_up_long"
+
 const val KEY_PASSENGER_ID = "key_passenger_id"
 const val KEY_PASSENGER_LAT = "key_passenger_lat"
 const val KEY_PASSENGER_LON = "key_passenger_lon"
@@ -29,3 +33,6 @@ const val STREAM_CHANNEL_TYPE_LIVESTREAM = "livestream"
 
 const val FILTER_UPDATED_AT = "updatedAt"
 const val FILTER_CREATED_AT = "createdAt"
+
+const val TYPE_PASSENGER: Boolean = false
+const val TYPE_DRIVER: Boolean = true
