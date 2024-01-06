@@ -40,14 +40,14 @@ class LogInUser(
                 }
             }
         } else {
-            if (!snapshot.exists() || !snapshot.contains("Rating") || !snapshot.contains("Total completed rides")) {
+            if (!snapshot.exists() || !snapshot.contains("Rating") || !snapshot.contains("Total rated rides")) {
                 val defaultValue = hashMapOf(
                     "Rating" to null,
-                    "Total completed rides" to 0
+                    "Total rated rides" to 0
                 )
                 userDocRef.set(defaultValue, SetOptions.merge()).await()
                 snapshot = userDocRef.get().await()
-                if (!snapshot.exists() || !snapshot.contains("Rating") || !snapshot.contains("Total completed rides")) {
+                if (!snapshot.exists() || !snapshot.contains("Rating") || !snapshot.contains("Total rated rides")) {
                     return ServiceResult.Failure(Exception("Unable to add user data"))
                 }
             }

@@ -43,7 +43,7 @@ class SignUpUser(
         } else {
             hashMapOf(
                 "Rating" to null,
-                "Total completed rides" to 0
+                "Total rated rides" to 0
             )
         }
         db.collection("Users").document(uid)
