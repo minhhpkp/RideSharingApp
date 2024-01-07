@@ -21,7 +21,7 @@ data class ChatKey(val channelId: String): DefaultFragmentKey(),
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
             //add(SplashViewModel(lookup(), backstack))
-            add(ChatViewModel(backstack, lookup()))
+            add(ChatViewModel(backstack, lookup(), lookup()))
         }
     }
 }

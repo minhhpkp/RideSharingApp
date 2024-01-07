@@ -12,7 +12,7 @@ import com.ridesharingapp.common.databinding.ListItemSearchLocationBinding
 class AutocompleteResultsAdapter : ListAdapter<AutoCompleteModel, AutocompleteResultsAdapter.AutoCompleteViewHolder>(
     object: DiffUtil.ItemCallback<AutoCompleteModel>() {
         override fun areItemsTheSame(oldItem: AutoCompleteModel, newItem: AutoCompleteModel): Boolean {
-            return oldItem.prediction.placeId == newItem.prediction.placeId
+            return oldItem.prediction?.placeId == newItem.prediction?.placeId
         }
 
         override fun areContentsTheSame(oldItem: AutoCompleteModel, newItem: AutoCompleteModel): Boolean {

@@ -33,16 +33,25 @@ class SplashViewModel(
 
         when (getUser) {
             //there's nothing else to do but send to the login page
-            is ServiceResult.Failure -> sendToLogin()
+            is ServiceResult.Failure -> {
+                Log.e("SplashViewModel", "failed to get current user", getUser.exception)
+                sendToLogin()
+            }
             is ServiceResult.Value -> {
-                if (getUser.value == null) sendToLogin()
-                else sendToDashboard(getUser.value!!)
+                if (getUser.value == null) {
+                    Log.d("SplashViewModel", "checkAuthState: null user")
+                    sendToLogin()
+                }
+                else {
+                    Log.d("SplashViewModel", "get current user successfully")
+                    sendToDashboard(getUser.value!!)
+                }
             }
         }
     }
 
     private fun sendToDashboard(user: GrabLamUser) {
-        Log.d("VM_USER", user.toString())
+        Log.d("SplashViewMode", "logged in user: $user")
         backstack.setHistory(
             History.of((DriverHomeKey())),
             StateChange.FORWARD

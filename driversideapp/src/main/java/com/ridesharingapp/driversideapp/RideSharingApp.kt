@@ -8,7 +8,9 @@ import com.google.maps.GeoApiContext
 import com.ridesharingapp.common.google.GoogleService
 import com.ridesharingapp.common.services.AuthenticationService
 import com.ridesharingapp.common.services.FirebaseAuthService
+import com.ridesharingapp.common.services.FirebaseHistoryService
 import com.ridesharingapp.common.services.FirebasePhotoService
+import com.ridesharingapp.common.services.HistoryService
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.services.StreamRideService
 import com.ridesharingapp.common.services.StreamUserService
@@ -33,6 +35,19 @@ class RideSharingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+
+//        // dev services
+//        // 10.0.2.2 is the special IP address to connect to the 'localhost' of
+//        // the host computer from an Android emulator.
+//        val firestore = Firebase.firestore
+//        firestore.useEmulator("10.0.2.2", 8080)
+//        firestore.firestoreSettings = firestoreSettings {
+//            isPersistenceEnabled = false
+//        }
+//        Firebase.auth.useEmulator("10.0.2.2", 9099)
+
+
         MapsInitializer.initialize(this)
         geoContext = GeoApiContext.Builder()
             .apiKey(BuildConfig.MAPS_API_KEY)
@@ -59,6 +74,8 @@ class RideSharingApp : Application() {
         val logOutUser = LogOutUser(firebaseAuthService, streamUserService)
         val updateUserAvatar = UpdateUserAvatar(firebaseStorageService, streamUserService)
 
+        val historyService = FirebaseHistoryService()
+
         globalServices = GlobalServices.builder()
             .add(streamRideService)
             .rebind<RideService>(streamRideService)
@@ -73,6 +90,8 @@ class RideSharingApp : Application() {
             .add(logOutUser)
             .add(updateUserAvatar)
             .add(streamClient)
+            .add(historyService)
+            .rebind<HistoryService>(historyService)
             .build()
     }
 

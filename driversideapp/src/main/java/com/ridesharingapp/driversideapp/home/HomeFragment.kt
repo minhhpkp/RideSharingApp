@@ -50,7 +50,9 @@ import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback {
+class HomeFragment : Fragment(R.layout.fragment_driver_home)
+    , OnMapReadyCallback
+{
     val viewModel by lazy {lookup<HomeViewModel>() }
     private var mapView: MapView? = null
     private var googleMap: GoogleMap? = null
@@ -91,13 +93,16 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             viewModel.openChat()
         }
 
-        binding.toolbar.profileIcon.setOnClickListener { viewModel.goToProfile() }
+        binding.toolbar.profileIcon.setOnClickListener {
+            viewModel.goToProfile()
+        }
     }
 
     private fun updateUi(uiState: HomeUiState) {
-        if (uiState != HomeUiState.SearchingForPassengers) binding.toolbar.profileIcon.visibility =
-            View.GONE
-        else binding.toolbar.profileIcon.visibility = View.VISIBLE
+        binding.toolbar.profileIcon.visibility =
+            if (uiState != HomeUiState.SearchingForPassengers)
+                View.GONE
+            else View.VISIBLE
 
         when (uiState) {
             HomeUiState.Error -> viewModel.handleError()
@@ -124,6 +129,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.complete)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -165,6 +171,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -176,6 +183,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
 
             advanceLayout.advanceButton.setImageResource(R.drawable.ic_arrival)
             advanceLayout.advanceButton.setOnLongClickListener {
+//                viewModel.saveRide()
                 viewModel.advanceRide()
                 true
             }
@@ -210,6 +218,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.GONE
+            mapLayout.cancelButton.text = getString(R.string.cancel)
 
             //unbind recyclerview from adapter
             passengerList.adapter = null
@@ -259,10 +268,10 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home), OnMapReadyCallback
             loadingView.loadingLayout.visibility = View.GONE
             searchingLayout.visibility = View.VISIBLE
 
-
             if (passengerList.adapter == null) {
                 passengerList.adapter = PassengerListAdapter().apply {
                     getDistance = ::requestDistanceBetweenPointsInKm
+                    getDistance = { _, _, _, _ -> "some distance" }
 
                     handleItemClick = {
                         viewModel.handlePassengerItemClick(it)

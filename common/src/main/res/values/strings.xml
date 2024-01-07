@@ -57,8 +57,8 @@
     <string name="no_passengers">Hiện tại không có hành khách gần mình.</string>
     <string name="passenger_location">Vị trí hành khách</string>
     <string name="cancel">Hủy</string>
-    <string name="arrived_at_destination">Đã đến điểm trả khách\n(Hold Icon Down)</string>
-    <string name="pick_up_passenger">Đón khách thành công\n(Hold Icon Down)</string>
+    <string name="arrived_at_destination">Đã đến điểm trả khách\n(Bấm và giữ để tiếp tục)</string>
+    <string name="pick_up_passenger">Đón khách thành công\n(Bấm và giữ để tiếp tục)</string>
     <string name="return_to_dashboard">Trở lại trang chủ</string>
     <string name="ride_completed">Chuyến xe\nHoàn thành</string>
     <string name="generic_error">An error has occurred.</string>
@@ -95,4 +95,22 @@
     <!--    driver side string by Nam-->
     <string name="cancel_ride">Hủy chuyến</string>
     <string name="reload">Tải lại danh sách</string>
+    <string name="complete">Hoàn tất</string>
+
+    <!--    for rating screen    -->
+    <string name="how_would_you_rate_the_ride">Bạn đánh giá chuyến đi này như thế nào?</string>
+    <string name="very_horrible">Rất tệ</string>
+    <string name="horrible">Tệ</string>
+    <string name="pretty_horrible">Khá tệ</string>
+    <string name="alright">Ổn</string>
+    <string name="good">Tốt</string>
+    <string name="very_good">Rất tốt</string>
+    <string name="skip">Bỏ qua</string>
+    <string name="continue_text">Tiếp tục</string>
+    <string name="history">Lịch sử</string>
+    <string name="empty_history_message">Bạn chưa tham gia chuyến xe nào.</string>
+    <string name="reward_points">Điểm thưởng: %1$s</string>
+    <string name="see_history">Xem lịch sử</string>
+    <string name="ride_card_title">Chuyến xe vào %1$s ngày %2$s</string>
+    <string name="ride_card_description">Điểm đến: %1$s\n%2$sGiá tiền: %3$s $\nĐánh giá: %4$s</string>
 </resources>

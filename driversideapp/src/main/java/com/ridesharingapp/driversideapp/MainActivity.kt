@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.ActivityMainBinding
-import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.ridesharingapp.driversideapp.navigation.SplashKey
-import com.ridesharingapp.driversideapp.splashscreen.SplashScreen
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.SimpleStateChanger
 import com.zhuinden.simplestack.StateChange
@@ -16,6 +14,7 @@ import com.zhuinden.simplestackextensions.navigatorktx.backstack
 import com.zhuinden.simplestackextensions.services.DefaultServiceProvider
 class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
     private lateinit var fragmentStateChanger: DefaultFragmentStateChanger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -30,6 +29,11 @@ class MainActivity : AppCompatActivity(), SimpleStateChanger.NavigationHandler {
             .setGlobalServices((application as RideSharingApp).globalServices)
             .install(this, binding.container, History.single(SplashKey()))
     }
+
+    @Deprecated(
+        "Deprecated in Java",
+        ReplaceWith("super.onBackPressed()", "androidx.appcompat.app.AppCompatActivity")
+    )
     override fun onBackPressed() {
         if (!backstack.goBack()) {
             super.onBackPressed()

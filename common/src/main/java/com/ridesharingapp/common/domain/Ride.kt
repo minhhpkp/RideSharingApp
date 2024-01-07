@@ -6,6 +6,9 @@ data class Ride(
     val destinationLatitude: Double = 0.0,
     val destinationLongitude: Double = 0.0,
     val destinationAddress: String = "",
+    val pickUpLatitude: Double = 0.0,
+    val pickUpLongitude: Double = 0.0,
+    val pickUpAddress: String = "",
     val passengerId: String = "",
     val passengerLatitude: Double = 0.0,
     val passengerLongitude: Double = 0.0,
@@ -19,8 +22,4 @@ data class Ride(
     val createdAt: String = "",
     val updatedAT: String = "",
     val totalMessages: Int = 0
-) {
-    companion object {
-        fun getDefaultRide(): Ride = Ride()
-    }
-}
+)

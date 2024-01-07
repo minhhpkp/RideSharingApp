@@ -1,14 +1,17 @@
 package com.ridesharingapp.passengersideapp
 
 import android.app.Application
-import com.google.android.gms.maps.MapsInitializer
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
-import com.google.maps.GeoApiContext
-import com.ridesharingapp.common.google.GoogleService
 import com.ridesharingapp.common.services.AuthenticationService
 import com.ridesharingapp.common.services.FirebaseAuthService
+import com.ridesharingapp.common.services.FirebaseHistoryService
 import com.ridesharingapp.common.services.FirebasePhotoService
+import com.ridesharingapp.common.services.HistoryService
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.services.StreamRideService
 import com.ridesharingapp.common.services.StreamUserService
@@ -30,16 +33,34 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 
 class RideSharingApp : Application() {
     lateinit var globalServices: GlobalServices
-    lateinit var geoContext: GeoApiContext
+//    lateinit var geoContext: GeoApiContext
     lateinit var service: NotificationService
 
     override fun onCreate() {
         super.onCreate()
+
+
+
+//        // dev services
+//        // 10.0.2.2 is the special IP address to connect to the 'localhost' of
+//        // the host computer from an Android emulator.
+//        val firestore = Firebase.firestore
+//        firestore.useEmulator("10.0.2.2", 8080)
+//        firestore.firestoreSettings = firestoreSettings {
+//            isPersistenceEnabled = false
+//        }
+//        Firebase.auth.useEmulator("10.0.2.2", 9099)
+
+
+
+
         service = NotificationService(applicationContext)
-        MapsInitializer.initialize(this)
-        geoContext = GeoApiContext.Builder()
-            .apiKey(BuildConfig.MAPS_API_KEY)
-            .build()
+        createNotificationChanel()
+
+//        MapsInitializer.initialize(this)
+//        geoContext = GeoApiContext.Builder()
+//            .apiKey(BuildConfig.MAPS_API_KEY)
+//            .build()
         val streamClient = configureStream()
 
         val firebaseAuthService = FirebaseAuthService(FirebaseAuth.getInstance())
@@ -48,13 +69,15 @@ class RideSharingApp : Application() {
         val streamUserService = StreamUserService(streamClient)
         val streamRideService = StreamRideService(streamClient)
 
-        val googleService = GoogleService(this, geoContext)
+//        val googleService = GoogleService(this, geoContext)
 
         val getUser = GetUser(firebaseAuthService, streamUserService)
         val signUpUser = SignUpUser(firebaseAuthService, streamUserService)
         val logInUser = LogInUser(firebaseAuthService, streamUserService)
         val logOutUser = LogOutUser(firebaseAuthService, streamUserService)
         val updateUserAvatar = UpdateUserAvatar(firebaseStorageService, streamUserService)
+
+        val historyService = FirebaseHistoryService()
 
         globalServices = GlobalServices.builder()
             .add(streamRideService)
@@ -63,14 +86,31 @@ class RideSharingApp : Application() {
             .rebind<UserService>(streamUserService)
             .add(firebaseAuthService)
             .rebind<AuthenticationService>(firebaseAuthService)
-            .add(googleService)
+//            .add(googleService)
             .add(getUser)
             .add(signUpUser)
             .add(logInUser)
             .add(logOutUser)
             .add(updateUserAvatar)
             .add(streamClient)
+            .add(historyService)
+            .rebind<HistoryService>(historyService)
             .build()
+    }
+
+    private fun createNotificationChanel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NotificationService.CHANNEL_ID,
+                "test",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            channel.description = "Just a test channel"
+
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private fun configureStream(): ChatClient {

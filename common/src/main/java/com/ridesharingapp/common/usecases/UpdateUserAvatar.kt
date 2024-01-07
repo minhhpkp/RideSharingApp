@@ -10,7 +10,7 @@ class UpdateUserAvatar(
     val userService: UserService
 ) {
     suspend fun updateAvatar(user: GrabLamUser, uri: String): ServiceResult<String> {
-        val updateAvatar = photoService.attemptUserAvatarUpdate(uri)
+        val updateAvatar = photoService.attemptUserAvatarUpdate(uri, user)
         return when (updateAvatar) {
             is ServiceResult.Failure -> updateAvatar
             is ServiceResult.Value -> updateUserPhoto(user, updateAvatar.value)

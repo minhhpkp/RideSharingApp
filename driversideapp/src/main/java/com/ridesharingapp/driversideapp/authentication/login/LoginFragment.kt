@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.ridesharingapp.common.uicommon.handleToast
+import com.ridesharingapp.passengersideapp.authentication.login.LoginScreen
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 
 class LoginFragment : Fragment() {

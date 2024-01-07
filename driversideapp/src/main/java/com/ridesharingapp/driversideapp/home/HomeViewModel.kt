@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -34,7 +35,7 @@ class HomeViewModel(
     val backstack: Backstack,
     val getUser: GetUser,
     val rideService: RideService
-    ) : ScopedServices.Activated, CoroutineScope {
+) : ScopedServices.Activated, CoroutineScope {
     private val canceller = Job()
 
     override val coroutineContext: CoroutineContext
@@ -47,24 +48,24 @@ class HomeViewModel(
     private val _mapIsReady = MutableStateFlow(false)
     private val _currentMessagesCount = MutableStateFlow(0)
 
-    /*
-    Different UI states:
-    1. User may never be null
-    2. Ride may be null (If User.status is INACTIVE, then no need to try to fetch a ride)
-    3. Ride may be not null, and in varying states:
-        - SEARCHING_FOR_DRIVER
-        - PASSENGER_PICK_UP
-        - EN_ROUTE
-        - ARRIVED
-     */
-    val uiState = combineTuple(_driverModel, _rideModel, _mapIsReady).map { (driver, rideResult, isMapReady) ->
-        if (rideResult is ServiceResult.Failure) return@map HomeUiState.Error
+    val uiState = combineTuple(
+        _driverModel,
+        _rideModel,
+        _mapIsReady
+    ).map { (driver, rideResult, isMapReady) ->
+        if (rideResult is ServiceResult.Failure) {
+            Log.e(TAG, "error caught in ride model state flow", rideResult.exception)
+            return@map HomeUiState.Error
+        }
         val ride = (rideResult as ServiceResult.Value).value
 
         if (driver == null || !isMapReady) HomeUiState.Loading
         else {
             when {
-                ride == null -> HomeUiState.SearchingForPassengers
+                ride == null -> {
+                    getPassengerList()
+                    HomeUiState.SearchingForPassengers
+                }
 
                 ride.status == RideStatus.PASSENGER_PICK_UP.value
                         && ride.driverLatitude != null
@@ -115,8 +116,13 @@ class HomeViewModel(
                     HomeUiState.NewMessages(ride.totalMessages)
                 }
 
+                ride.status == RideStatus.PENDING_RATING.value -> {
+                    Log.d(TAG, "PENDING_RATING state reached")
+                    HomeUiState.SearchingForPassengers
+                }
+
                 else -> {
-                    Log.e("ELSE", "${driver}, ${ride}")
+                    Log.e(TAG, "unexpected state: driver=${driver}, ride=${ride}")
                     HomeUiState.Error
                 }
             }
@@ -132,11 +138,16 @@ class HomeViewModel(
     val locationAwarePassengerList = combineTuple(_driverLocation, _passengerList).map {
         if (it.first.lat == DEFAULT_LAT_OR_LON
             || it.first.lng == DEFAULT_LAT_OR_LON
-        ) emptyList<Pair<Ride, LatLng>>()
+        ) emptyList()
         else {
             if (it.second is ServiceResult.Failure) {
+                Log.e(
+                    TAG,
+                    "error caught in passenger list state flow",
+                    (it.second as ServiceResult.Failure<List<Ride>>).exception
+                )
                 handleError()
-                emptyList<Pair<Ride, LatLng>>()
+                emptyList()
             } else {
                 val result = it.second as ServiceResult.Value
                 result.value.map { ride ->
@@ -154,12 +165,17 @@ class HomeViewModel(
         val getUser = getUser.getUser()
         when (getUser) {
             is ServiceResult.Failure -> {
+                Log.e(TAG, "failed to get driver", getUser.exception)
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
                 sendToLogin()
             }
+
             is ServiceResult.Value -> {
-                if (getUser.value == null) sendToLogin()
-                else {
+                if (getUser.value == null) {
+                    Log.w(TAG, "getDriver: null driver")
+                    sendToLogin()
+                } else {
+                    Log.d(TAG, "getDriver: success")
                     getActiveRideIfItExists(getUser.value!!)
                 }
             }
@@ -176,15 +192,28 @@ class HomeViewModel(
 
         when (result) {
             is ServiceResult.Failure -> {
+                Log.e(TAG, "failed to get active ride", result.exception)
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
+
             is ServiceResult.Value -> {
                 //if null, no active ride exists
                 if (result.value == null) {
+                    Log.d(TAG, "getActiveRideIfItExists: no active ride exists")
                     _driverModel.value = user
+                    // old: don't need to call this here because the value null has been emitted in the
+                    // ride model flow which causes the uiState to call this in its flow combining operation
+                    // update: with the change in StreamRideService::observeOpenRides
+                    // when the ride in open rides list is cancelled or taken, it will be automatically deleted from the list
+                    // and we don't need to handle that in the flow operation
+                    // thus we will remove the call to getPassengerList in the flow operation
+                    // and add this back to here.
                     getPassengerList()
-                } else observeRideModel(result.value!!, user)
+                } else {
+                    Log.d(TAG, "getActiveRideIfItExists: active ride found")
+                    observeRideModel(result.value!!, user)
+                }
             }
         }
     }
@@ -195,7 +224,7 @@ class HomeViewModel(
         _driverModel.value = user
     }
 
-    private suspend fun getPassengerList() {
+    suspend fun getPassengerList() {
         rideService.observeOpenRides()
     }
 
@@ -212,8 +241,13 @@ class HomeViewModel(
             )
 
             when (result) {
-                is ServiceResult.Failure -> toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+                is ServiceResult.Failure -> {
+                    Log.e(TAG, "failed to connect driver to ride", result.exception)
+                    toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+                }
+
                 is ServiceResult.Value -> {
+                    Log.d(TAG, "connect driver to ride successfully")
                     _passengerList = emptyFlow()
                     rideService.observeRideById(result.value)
                 }
@@ -228,6 +262,7 @@ class HomeViewModel(
             History.of(ProfileSettingsKey()),
             StateChange.FORWARD
         )
+//        backstack.goTo(ProfileSettingsKey())
     }
 
     fun updateDriverLocation(latLng: LatLng) = launch(Dispatchers.Main) {
@@ -249,16 +284,19 @@ class HomeViewModel(
     }
 
     fun cancelRide() = launch(Dispatchers.Main) {
-        val cancelRide = rideService.cancelRide()
-        when (cancelRide) {
+        when (val cancelRide = rideService.cancelRide()) {
             is ServiceResult.Failure -> {
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
                 Log.e("HomeViewModel", "cancelRide failure", cancelRide.exception)
+                rideService.clearRideModel()
                 sendToSplash()
             }
 
             //State should automatically be handled by the flow
-            is ServiceResult.Value -> Unit
+            is ServiceResult.Value -> {
+                getPassengerList()
+                Log.d(TAG, "cancelRide successfully")
+            }
         }
     }
 
@@ -279,6 +317,20 @@ class HomeViewModel(
 
     override fun onServiceActive() {
         getDriver()
+
+        // Simply remove the ride model when the status is pending rating
+        launch(Dispatchers.Main) {
+            _rideModel
+                .distinctUntilChanged()
+                .collect { rideModel ->
+                    if (rideModel is ServiceResult.Value) {
+                        val ride = rideModel.value
+                        if (ride != null && ride.status == RideStatus.PENDING_RATING.value) {
+                            rideService.clearRideModel()
+                        }
+                    }
+                }
+        }
     }
 
     override fun onServiceInactive() {
@@ -290,23 +342,23 @@ class HomeViewModel(
     }
 
     fun completeRide() = launch(Dispatchers.Main) {
-
         val ride = _rideModel.first()
 
         if (ride is ServiceResult.Value && ride.value != null) {
-            val completeRide = rideService.completeRide(ride.value!!)
-            when (completeRide) {
+            when (val completeRide = rideService.completeRide(ride.value!!)) {
                 is ServiceResult.Failure -> {
                     toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
-                    Log.e("HomeViewModel", "completeRide failure", completeRide.exception)
+                    Log.e("HomeViewModel", "completeRide: failure", completeRide.exception)
                     sendToSplash()
                 }
+
                 is ServiceResult.Value -> {
+                    Log.d("HomeViewModel", "completeRide: success")
                     sendToSplash()
                 }
             }
         } else {
-            Log.e("HomeViewModel", "completeRide ride is failure or null")
+            Log.e("HomeViewModel", "completeRide: unable to get current ride")
         }
     }
 
@@ -321,9 +373,17 @@ class HomeViewModel(
 
             when (updateRide) {
                 is ServiceResult.Failure -> {
+                    Log.e(TAG, "failed to advance ride", updateRide.exception)
                     toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 }
-                is ServiceResult.Value -> Unit
+
+                is ServiceResult.Value -> {
+                    Log.d(
+                        TAG,
+                        "advanceRide, newState=${(_rideModel.first() as ServiceResult.Value).value?.status ?: "null ride"}"
+                    )
+                    Log.d(TAG, "advance ride successfully")
+                }
             }
         }
 
@@ -345,11 +405,28 @@ class HomeViewModel(
                 History.of(ChatKey(currentRide.value!!.rideId)),
                 StateChange.FORWARD
             )
+        } else {
+            Log.e(
+                TAG, "failed to get current chat channel",
+                if (currentRide is ServiceResult.Failure) currentRide.exception
+                else Exception("null channel")
+            )
         }
     }
 
     fun queryRidesAgain() = launch(Dispatchers.Main) {
         getPassengerList()
+    }
+
+//    fun saveRide() = launch(Dispatchers.IO) {
+//        val ride = _rideModel.first()
+//        if (ride is ServiceResult.Value && ride.value != null) {
+//            rideService.saveRide(ride.value!!)
+//        }
+//    }
+
+    companion object {
+        val TAG = HomeViewModel::class.simpleName
     }
 }
 

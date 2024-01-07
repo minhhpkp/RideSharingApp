@@ -1,28 +1,30 @@
 package com.ridesharingapp.passengersideapp.profile.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -34,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,10 +43,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.domain.GrabLamUser
-import com.ridesharingapp.common.domain.UserType
 import com.ridesharingapp.common.style.color_black
 import com.ridesharingapp.common.style.color_primary
 import com.ridesharingapp.common.style.color_white
@@ -55,51 +57,126 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun ProfileSettingsScreen(
     viewModel: ProfileSettingsViewModel,
-//    unregisteredUserView: Boolean
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = color_white),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+    val profilePicUpdateInProgress by viewModel.profilePicUpdateInProgress.collectAsStateWithLifecycle()
+    val user by viewModel.userModel.collectAsState()
+    val rewardPoints by viewModel.earnedPoints.collectAsStateWithLifecycle()
+
+    ProfileSettingsScreen(
+        user = user,
+        profilePicUpdateInProgress = profilePicUpdateInProgress,
+        handleBackPress = { viewModel.handleBackPress() },
+        handleLogOut = { viewModel.handleLogOut() },
+        handleThumbnailUpdate = { imageUri ->
+            viewModel.handleThumbnailUpdate(imageUri)
+        },
+        rewardPoints = rewardPoints,
+        handleSeeHistoryClicked = { viewModel.seeHistory() }
+//        handleToggleUserType = { viewModel.handleToggleUserType() }
+    )
+}
+
+// stateless version of the screen for previewing
+@Composable
+fun ProfileSettingsScreen(
+    user: GrabLamUser?,
+    profilePicUpdateInProgress: Boolean,
+    handleBackPress: (() -> Unit),
+    handleLogOut: (() -> Unit),
+    handleThumbnailUpdate: ((Uri?) -> Unit),
+    rewardPoints: Long = 0,
+    handleSeeHistoryClicked: () -> Unit = {}
+//    handleToggleUserType: (() -> Unit)
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        ProfileToolbar(viewModel = viewModel)
+        Column(
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .background(color = if (profilePicUpdateInProgress) Color.Gray.copy(alpha = 0.5f) else color_white),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+        ) {
+            ProfileToolbar(
+                handleBackPress = handleBackPress,
+                handleLogOut = handleLogOut,
+                enabled = !profilePicUpdateInProgress
+            )
 
-        /*var driverSwitchState by rememberSaveable {
-            mutableStateOf(false)
-        }*/
+            /*var driverSwitchState by rememberSaveable {
+                mutableStateOf(false)
+            }*/
 
-        val user by viewModel.userModel.collectAsState()
+            ProfileHeader(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .padding(bottom = 64.dp),
+                user = user,
+                handleThumbnailUpdate = handleThumbnailUpdate,
+                updateInProgress = profilePicUpdateInProgress
+            )
 
-        ProfileHeader(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .padding(bottom = 64.dp),
-            viewModel = viewModel,
-            user = user
-        )
+           /* UserTypeState(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .wrapContentHeight()
+                    .border(
+                        width = 1.dp,
+                        color_black.copy(alpha = 0.12f),
+                        RoundedCornerShape(4.dp)
+                    ),
+                user = user,
+                enabled = !profilePicUpdateInProgress,
+                handleToggleUserType = handleToggleUserType
+            )*/
 
-        UserTypeState(
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .wrapContentHeight()
-                .border(
-                    width = 1.dp,
-                    color_black.copy(alpha = 0.12f),
-                    RoundedCornerShape(4.dp)
-                ),
-            viewModel = viewModel,
-            user = user
-        )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+                    .padding(horizontal = 32.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Top
+            ) {
+                Text(
+                    text = stringResource(R.string.reward_points, rewardPoints),
+                    style = typography.h5
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor =
+                            if (!profilePicUpdateInProgress) color_primary
+                            else color_black,
+                        contentColor = color_white
+                    ),
+                    onClick = handleSeeHistoryClicked,
+                    enabled = !profilePicUpdateInProgress,
+
+                ) {
+                    Text(
+                        text = stringResource(R.string.see_history),
+                        style = typography.button
+                    )
+                }
+            }
+        }
+        if (profilePicUpdateInProgress) CircularProgressIndicator()
     }
 }
 
 @Composable
 fun ProfileToolbar(
     modifier: Modifier = Modifier,
-    viewModel: ProfileSettingsViewModel
+    handleBackPress: () -> Unit,
+    handleLogOut: () -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier
@@ -110,13 +187,15 @@ fun ProfileToolbar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            modifier = Modifier.clickable { viewModel.handleBackPress() },
+            modifier = if (enabled) Modifier.clickable { handleBackPress() }
+            else Modifier,
             imageVector = Icons.Filled.KeyboardArrowLeft,
             contentDescription = stringResource(id = R.string.close_icon)
         )
 
         TextButton(
-            onClick = { viewModel.handleLogOut() }
+            onClick = { handleLogOut() },
+            enabled = enabled
         ) {
             Text(
                 text = stringResource(id = R.string.log_out),
@@ -132,8 +211,9 @@ fun ProfileToolbar(
 @Composable
 fun ProfileHeader(
     modifier: Modifier,
-    viewModel: ProfileSettingsViewModel,
-    user: GrabLamUser?
+    handleThumbnailUpdate: (Uri?) -> Unit,
+    user: GrabLamUser?,
+    updateInProgress: Boolean = false
 ) {
 
     //Note: You would want to do better null checking than this in a prod app
@@ -141,11 +221,16 @@ fun ProfileHeader(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ProfileAvatar(modifier = Modifier, viewModel = viewModel, user = user)
+        ProfileAvatar(
+            modifier = Modifier,
+            handleThumbnailUpdate = handleThumbnailUpdate,
+            user = user,
+            updateInProgress = updateInProgress
+        )
         Text(
             modifier = Modifier
                 .padding(start = 16.dp),
-            text = user.username,
+            text = if (updateInProgress) stringResource(id = R.string.loading) else user.username,
             style = typography.h2
         )
     }
@@ -154,8 +239,9 @@ fun ProfileHeader(
 @Composable
 fun ProfileAvatar(
     modifier: Modifier,
-    viewModel: ProfileSettingsViewModel,
-    user: GrabLamUser
+    handleThumbnailUpdate: (Uri?) -> Unit,
+    user: GrabLamUser,
+    updateInProgress: Boolean = false
 ) {
     Box(
         modifier = modifier
@@ -163,7 +249,6 @@ fun ProfileAvatar(
             .padding(start = 16.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-
         if (user.avatarPhotoUrl == "") Image(
             modifier = Modifier
                 .size(88.dp)
@@ -173,22 +258,29 @@ fun ProfileAvatar(
             contentDescription = stringResource(id = R.string.user_avatar),
             contentScale = ContentScale.Crop,
             colorFilter = ColorFilter.tint(color_primary)
-        ) else GlideImage(
-            modifier = Modifier
-                .size(88.dp)
-                .clip(CircleShape),
-            imageModel = { user.avatarPhotoUrl }
-        )
+        ) else if (!updateInProgress) {
+            GlideImage(
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(CircleShape),
+                imageModel = { user.avatarPhotoUrl },
+                loading = {
+                    Box(modifier = Modifier.matchParentSize()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                }
+            )
+        }
 
         val launcher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
             onResult = {
-                viewModel.handleThumbnailUpdate(it.data?.data)
+                handleThumbnailUpdate.invoke(it.data?.data)
             }
         )
 
         Icon(
-            modifier = Modifier.clickable {
+            modifier = if (updateInProgress) Modifier else Modifier.clickable {
                 launcher.launch(
                     Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                 )
@@ -200,11 +292,12 @@ fun ProfileAvatar(
     }
 }
 
-@Composable
+/*@Composable
 fun UserTypeState(
     modifier: Modifier,
-    viewModel: ProfileSettingsViewModel,
-    user: GrabLamUser?
+    handleToggleUserType: () -> Unit,
+    user: GrabLamUser?,
+    enabled: Boolean = true
 ) {
     if (user != null) {
         Column(
@@ -226,13 +319,28 @@ fun UserTypeState(
                     .padding(bottom = 16.dp)
                     .scale(1.5f),
                 checked = user.type != UserType.PASSENGER.value,
-                onCheckedChange = { viewModel.handleToggleUserType() },
+                onCheckedChange = { handleToggleUserType() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = color_primary,
                     checkedTrackColor = color_primary
-                )
+                ),
+                enabled = enabled
             )
         }
-
     }
+}*/
+
+@Preview
+@Composable
+fun ProfileSettingsScreenPreview() {
+    ProfileSettingsScreen(
+        user = GrabLamUser(username = "Passenger"),
+        profilePicUpdateInProgress = false,
+        handleBackPress = {},
+        handleLogOut = {},
+        handleThumbnailUpdate = {},
+        rewardPoints = 50,
+        handleSeeHistoryClicked = {}
+//        handleToggleUserType = {}
+    )
 }

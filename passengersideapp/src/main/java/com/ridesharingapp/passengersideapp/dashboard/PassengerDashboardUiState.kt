@@ -40,6 +40,10 @@ sealed interface PassengerDashboardUiState {
         val driverAvatar: String
     ): PassengerDashboardUiState
 
+    data class Rating(
+        val rating: Float = 5.0f
+    ): PassengerDashboardUiState
+
     //Signals something unexpected has happened
     object Error: PassengerDashboardUiState
     object Loading: PassengerDashboardUiState
