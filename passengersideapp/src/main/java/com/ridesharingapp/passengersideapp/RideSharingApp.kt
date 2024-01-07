@@ -9,7 +9,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.ridesharingapp.common.services.AuthenticationService
 import com.ridesharingapp.common.services.FirebaseAuthService
+import com.ridesharingapp.common.services.FirebaseHistoryService
 import com.ridesharingapp.common.services.FirebasePhotoService
+import com.ridesharingapp.common.services.HistoryService
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.services.StreamRideService
 import com.ridesharingapp.common.services.StreamUserService
@@ -75,6 +77,8 @@ class RideSharingApp : Application() {
         val logOutUser = LogOutUser(firebaseAuthService, streamUserService)
         val updateUserAvatar = UpdateUserAvatar(firebaseStorageService, streamUserService)
 
+        val historyService = FirebaseHistoryService()
+
         globalServices = GlobalServices.builder()
             .add(streamRideService)
             .rebind<RideService>(streamRideService)
@@ -89,6 +93,8 @@ class RideSharingApp : Application() {
             .add(logOutUser)
             .add(updateUserAvatar)
             .add(streamClient)
+            .add(historyService)
+            .rebind<HistoryService>(historyService)
             .build()
     }
 

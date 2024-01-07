@@ -409,10 +409,11 @@ class PassengerDashboardViewModel(
     fun goToProfile() {
         //normally we would use backStack.goTo(...), but we always want to reload the state
         //of the dashboard
-        backstack.setHistory(
-            History.of(ProfileSettingsKey()),
-            StateChange.FORWARD
-        )
+//        backstack.setHistory(
+//            History.of(ProfileSettingsKey()),
+//            StateChange.FORWARD
+//        )
+        backstack.goTo(ProfileSettingsKey())
     }
 
     fun sendRating() {

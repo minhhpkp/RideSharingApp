@@ -107,4 +107,10 @@
     <string name="very_good">Rất tốt</string>
     <string name="skip">Bỏ qua</string>
     <string name="continue_text">Tiếp tục</string>
+    <string name="history">Lịch sử</string>
+    <string name="empty_history_message">Bạn chưa tham gia chuyến xe nào.</string>
+    <string name="reward_points">Điểm thưởng: %1$s</string>
+    <string name="see_history">Xem lịch sử</string>
+    <string name="ride_card_title">Chuyến xe vào %1$s ngày %2$s</string>
+    <string name="ride_card_description">Điểm đến: %1$s\n%2$sGiá tiền: %3$s $\nĐánh giá: %4$s</string>
 </resources>

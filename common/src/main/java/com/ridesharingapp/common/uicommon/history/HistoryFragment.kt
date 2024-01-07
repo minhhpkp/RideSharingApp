@@ -1,4 +1,4 @@
-package com.ridesharingapp.driversideapp.settings
+package com.ridesharingapp.common.uicommon.history
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,15 +9,18 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 
-class ProfileSettingsFragment: Fragment() {
-    private val viewModel by lazy { lookup<ProfileSettingsViewModel>() }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+class HistoryFragment: Fragment() {
+    private val viewModel by lazy { lookup<HistoryViewModel>() }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return ComposeView(requireContext()).apply {
-            // Dispose the Composition when the view's LifecycleOwner
-            // is destroyed
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                ProfileSettingsScreen(viewModel)
+                HistoryScreen(viewModel)
             }
         }
     }

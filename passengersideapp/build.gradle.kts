@@ -56,6 +56,7 @@ android {
 
 dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.6.0-beta03")
     val navVersion = "2.7.6"
     val lifecycleVersion = "2.6.2"
 
