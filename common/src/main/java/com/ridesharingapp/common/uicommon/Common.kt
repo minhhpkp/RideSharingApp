@@ -23,7 +23,13 @@ https://github.com/Zhuinden/flow-combinetuple-kt/blob/master/src/main/java/com/z
 
 fun <T1, T2> combineTuple(f1: Flow<T1>, f2: Flow<T2>): Flow<Pair<T1, T2>> = combine(f1, f2) { t1, t2 -> Pair(t1, t2) }
 
-fun <T1, T2, T3> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>): Flow<Triple<T1, T2, T3>> = combine(f1, f2, f3) { t1, t2, t3 -> Triple<T1, T2, T3>(t1, t2, t3) }
+fun <T1, T2, T3> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>): Flow<Triple<T1, T2, T3>> = combine(f1, f2, f3) { t1, t2, t3 -> Triple(t1, t2, t3) }
+
+fun <T1, T2, T3, T4> combineTuple(f1: Flow<T1>, f2: Flow<T2>, f3: Flow<T3>, f4: Flow<T4>): Flow<Quadruple<T1, T2, T3, T4>> = combine(f1, f2, f3, f4) { t1, t2, t3, t4 -> Quadruple(t1, t2, t3, t4) }
+
+data class Quadruple <T1, T2, T3, T4> (val first: T1, val second: T2, val third: T3, val fourth: T4)
+
+
 
 //How frequently do we want to request the location in milliseconds (10s here)
 const val LOCATION_REQUEST_INTERVAL = 10000L

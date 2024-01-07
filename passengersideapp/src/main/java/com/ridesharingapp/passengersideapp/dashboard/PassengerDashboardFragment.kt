@@ -1,8 +1,20 @@
 package com.ridesharingapp.passengersideapp.dashboard
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.location.LocationManagerCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -10,38 +22,59 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.libraries.places.api.Places
+import com.google.maps.DirectionsApi
+import com.google.maps.android.PolyUtil
+import com.google.maps.model.TravelMode
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.FragmentPassengerDashboardBinding
+import com.ridesharingapp.common.uicommon.LOCATION_REQUEST_INTERVAL
 import com.ridesharingapp.common.uicommon.handleToast
+import com.ridesharingapp.common.uicommon.hideKeyboard
+import com.ridesharingapp.passengersideapp.BuildConfig
 import com.ridesharingapp.passengersideapp.RideSharingApp
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboard)
-//    , OnMapReadyCallback
+    , OnMapReadyCallback
 {
 
     private val viewModel by lazy { lookup<PassengerDashboardViewModel>() }
 
-//    private var mapView: MapView? = null
-//    private var googleMap: GoogleMap? = null
-//    private var locationRequest: LocationRequest? = null
-//    private lateinit var locationClient: FusedLocationProviderClient
+    private var mapView: MapView? = null
+    private var googleMap: GoogleMap? = null
+    private var locationRequest: LocationRequest? = null
+    private lateinit var locationClient: FusedLocationProviderClient
 
 
     lateinit var binding: FragmentPassengerDashboardBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentPassengerDashboardBinding.bind(view)
-//        Places.initialize(requireActivity().application, BuildConfig.MAPS_API_KEY)
-//        locationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        Places.initialize(requireActivity().application, BuildConfig.MAPS_API_KEY)
+        locationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-//        mapView = binding.mapLayout.mapView
-//        mapView?.onCreate(savedInstanceState)
+        mapView = binding.mapLayout.mapView
+        mapView?.onCreate(savedInstanceState)
 
-//        requestPermission()
+        requestPermission()
 
         lifecycleScope.launch {
             viewModel.uiState
@@ -65,11 +98,6 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             }
             toolbar.profileIcon.setOnClickListener {
                 viewModel.goToProfile()
-            }
-            destinationTitle.setOnClickListener {
-                viewModel.handleSearchItemClick(
-                    AutoCompleteModel(address = "Some address", prediction = null)
-                )
             }
             ratingBar.setOnRatingBarChangeListener { _, rating, _ ->
                 viewModel.updateRating(rating)
@@ -97,7 +125,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             }
 
             is PassengerDashboardUiState.RideInactive -> rideInactiveState()
-            is PassengerDashboardUiState.SearchingForDriver -> searchingForDriverState()
+            is PassengerDashboardUiState.SearchingForDriver -> searchingForDriverState(uiState)
             is PassengerDashboardUiState.PassengerPickUp -> passengerPickUp(uiState)
             is PassengerDashboardUiState.EnRoute -> enRoute(uiState)
             is PassengerDashboardUiState.Arrived -> arrived(uiState)
@@ -105,7 +133,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             is PassengerDashboardUiState.NewMessages -> updateMessageButton(uiState.totalMessages)
         }
 
-//        updateMap(uiState)
+        updateMap(uiState)
     }
 
     private fun rating(uiState: PassengerDashboardUiState.Rating) {
@@ -156,10 +184,10 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
-//            autocompleteResults.adapter = null
+            autocompleteResults.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
 
             rideComplete.rideCompleteLayout.visibility = View.VISIBLE
             rideComplete.advanceButton.visibility = View.GONE
@@ -200,10 +228,10 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
-//            autocompleteResults.adapter = null
+            autocompleteResults.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
 
             driverName.text = uiState.driverName
             Glide.with(requireContext())
@@ -247,10 +275,10 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
             searchingForDriver.searchingForDriverLayout.visibility = View.GONE
             //unbind recyclerview from adapter
-//            autocompleteResults.adapter = null
+            autocompleteResults.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
 
             driverName.text = uiState.driverName
             Glide.with(requireContext())
@@ -277,7 +305,7 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
         }
     }
 
-    private fun searchingForDriverState(/*uiState: PassengerDashboardUiState.SearchingForDriver*/) {
+    private fun searchingForDriverState(uiState: PassengerDashboardUiState.SearchingForDriver) {
         binding.apply {
             rideLayout.visibility = View.VISIBLE
             loadingView.loadingLayout.visibility = View.GONE
@@ -290,10 +318,10 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
 
             searchingForDriver.searchingForDriverLayout.visibility = View.VISIBLE
             //unbind recyclerview from adapter
-//            autocompleteResults.adapter = null
+            autocompleteResults.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
         }
     }
 
@@ -308,38 +336,38 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             searchingLayout.visibility = View.VISIBLE
             ratingLayout.visibility = View.GONE
 
-//            if (autocompleteResults.adapter == null) {
-//                autocompleteResults.adapter = AutocompleteResultsAdapter().apply {
-//                    handleItemClick = {
-//                        hideKeyboard(binding.searchEditText, requireContext())
-//                        viewModel.handleSearchItemClick(it)
-//                        this.submitList(emptyList())
-//                    }
-//                }
-//            }
+            if (autocompleteResults.adapter == null) {
+                autocompleteResults.adapter = AutocompleteResultsAdapter().apply {
+                    handleItemClick = {
+                        hideKeyboard(binding.searchEditText, requireContext())
+                        viewModel.handleSearchItemClick(it)
+                        this.submitList(emptyList())
+                    }
+                }
+            }
 
             //somewhat worried this could attach multiple observers
-//            lifecycleScope.launch {
-//                viewModel.autoCompleteList
-//                    //Only emit states when lifecycle of the fragment is started
-//                    .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-//                    .distinctUntilChanged()
-//                    .collect { models ->
-//                        (autocompleteResults.adapter as AutocompleteResultsAdapter)
-//                            .submitList(models)
-//                    }
-//            }
+            lifecycleScope.launch {
+                viewModel.autoCompleteList
+                    //Only emit states when lifecycle of the fragment is started
+                    .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                    .distinctUntilChanged()
+                    .collect { models ->
+                        (autocompleteResults.adapter as AutocompleteResultsAdapter)
+                            .submitList(models)
+                    }
+            }
 
-            searchEditText.doOnTextChanged { text, start, before, count ->
+            searchEditText.doOnTextChanged { text, _, _, _ ->
                 if (text.isNullOrBlank() || text.length < 3) Unit
                 else {
-//                    viewModel.requestAutocompleteResults(text.toString())
+                    viewModel.requestAutocompleteResults(text.toString())
                 }
             }
         }
     }
 
-    /*@SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
 
@@ -362,10 +390,10 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             googleMap.setMinZoomPreference(12f)
             viewModel.mapIsReady()
         }
-    }*/
+    }
 
 
-    /*private fun updateMap(
+    private fun updateMap(
         uiState: PassengerDashboardUiState
     ) {
         if (googleMap != null) {
@@ -573,9 +601,9 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                 else -> Unit
             }
         }
-    }*/
+    }
 
-    /*@SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     private fun requestLocation() {
         //This function is a great introduction to programming with the Android SDK ;)
         val locationManager = (requireActivity()
@@ -627,9 +655,9 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             ).show()
             viewModel.handleError()
         }
-    }*/
+    }
 
-    /*@SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     private fun startRequestingLocationUpdates() {
         locationClient
             .lastLocation
@@ -653,9 +681,9 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
                     viewModel.handleError()
                 }
             }
-    }*/
+    }
 
-    /*private fun requestPermission() {
+    private fun requestPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -672,9 +700,9 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             //get user location
             requestLocation()
         }
-    }*/
+    }
 
-   /* val requestPermissionLauncher = registerForActivityResult(
+    val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -688,27 +716,27 @@ class PassengerDashboardFragment : Fragment(R.layout.fragment_passenger_dashboar
             ).show()
             viewModel.handleError()
         }
-    }*/
+    }
 
     //So yeah, if you don't add this crap here, the MapView will be basically useless.
     //Apparently this happenings when working with a MapView that starts out View.INVISIBLE or smth?
-//    override fun onResume() {
-//        mapView?.onResume()
-//        super.onResume()
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        mapView?.onPause()
-//    }
-//
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        mapView?.onDestroy()
-//    }
-//
-//    override fun onLowMemory() {
-//        super.onLowMemory()
-//        mapView?.onLowMemory()
-//    }
+    override fun onResume() {
+        mapView?.onResume()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView?.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView?.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
+    }
 }

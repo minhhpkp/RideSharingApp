@@ -5,8 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import com.google.android.gms.maps.MapsInitializer
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
+import com.google.maps.GeoApiContext
+import com.ridesharingapp.common.google.GoogleService
 import com.ridesharingapp.common.services.AuthenticationService
 import com.ridesharingapp.common.services.FirebaseAuthService
 import com.ridesharingapp.common.services.FirebaseHistoryService
@@ -33,7 +36,7 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 
 class RideSharingApp : Application() {
     lateinit var globalServices: GlobalServices
-//    lateinit var geoContext: GeoApiContext
+    lateinit var geoContext: GeoApiContext
     lateinit var service: NotificationService
 
     override fun onCreate() {
@@ -57,10 +60,10 @@ class RideSharingApp : Application() {
         service = NotificationService(applicationContext)
         createNotificationChanel()
 
-//        MapsInitializer.initialize(this)
-//        geoContext = GeoApiContext.Builder()
-//            .apiKey(BuildConfig.MAPS_API_KEY)
-//            .build()
+        MapsInitializer.initialize(this)
+        geoContext = GeoApiContext.Builder()
+            .apiKey(BuildConfig.MAPS_API_KEY)
+            .build()
         val streamClient = configureStream()
 
         val firebaseAuthService = FirebaseAuthService(FirebaseAuth.getInstance())
@@ -69,7 +72,7 @@ class RideSharingApp : Application() {
         val streamUserService = StreamUserService(streamClient)
         val streamRideService = StreamRideService(streamClient)
 
-//        val googleService = GoogleService(this, geoContext)
+        val googleService = GoogleService(this, geoContext)
 
         val getUser = GetUser(firebaseAuthService, streamUserService)
         val signUpUser = SignUpUser(firebaseAuthService, streamUserService)
@@ -86,7 +89,7 @@ class RideSharingApp : Application() {
             .rebind<UserService>(streamUserService)
             .add(firebaseAuthService)
             .rebind<AuthenticationService>(firebaseAuthService)
-//            .add(googleService)
+            .add(googleService)
             .add(getUser)
             .add(signUpUser)
             .add(logInUser)
