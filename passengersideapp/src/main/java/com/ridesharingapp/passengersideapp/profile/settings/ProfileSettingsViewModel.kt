@@ -12,6 +12,7 @@ import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.common.usecases.LogOutUser
 import com.ridesharingapp.common.usecases.UpdateUserAvatar
 import com.ridesharingapp.passengersideapp.navigation.LoginKey
+import com.ridesharingapp.passengersideapp.navigation.PassengerDashboardKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.ScopedServices
@@ -45,7 +46,9 @@ class ProfileSettingsViewModel(
 
     fun handleLogOut() = launch(Dispatchers.Main) {
         logUserOut.logout()
+        Log.d(TAG, "logout successfully")
         sendToLogin()
+        canceller.cancel()
     }
 
     private fun getUser() = launch(Dispatchers.Main) {
@@ -92,7 +95,6 @@ class ProfileSettingsViewModel(
 
     override fun onServiceInactive() {
         historyService.stopListeningForRewardPointsChanges()
-        canceller.cancel()
         toastHandler = null
     }
 
@@ -159,12 +161,13 @@ class ProfileSettingsViewModel(
     }
 
     fun handleBackPress() {
-        /*backstack.setHistory(
+        backstack.setHistory(
             History.of(PassengerDashboardKey()),
             //Direction of navigation which is used for animation
             StateChange.BACKWARD
-        )*/
-        backstack.goBack()
+        )
+        canceller.cancel()
+//        backstack.goBack()
     }
 
     private val canceller = Job()

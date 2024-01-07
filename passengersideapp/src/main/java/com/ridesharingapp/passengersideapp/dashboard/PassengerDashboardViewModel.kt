@@ -1,10 +1,13 @@
 package com.ridesharingapp.passengersideapp.dashboard
 
 import android.util.Log
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
+import com.google.maps.model.LatLng
 import com.ridesharingapp.common.ServiceResult
 import com.ridesharingapp.common.domain.GrabLamUser
 import com.ridesharingapp.common.domain.Ride
 import com.ridesharingapp.common.domain.RideStatus
+import com.ridesharingapp.common.google.GoogleService
 import com.ridesharingapp.common.services.RideService
 import com.ridesharingapp.common.uicommon.ToastMessages
 import com.ridesharingapp.common.uicommon.combineTuple
@@ -22,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -32,8 +36,8 @@ import kotlin.coroutines.CoroutineContext
 class PassengerDashboardViewModel(
     val backstack: Backstack,
     val getUser: GetUser,
-    val rideService: RideService
-//    , val googleService: com.ridesharingapp.common.google.GoogleService
+    val rideService: RideService,
+    val googleService: GoogleService
 ) : ScopedServices.Activated, CoroutineScope {
 
     private val _savedRideId: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -47,7 +51,7 @@ class PassengerDashboardViewModel(
 
     private val _passengerModel = MutableStateFlow<GrabLamUser?>(null)
     private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
-//    private val _mapIsReady = MutableStateFlow(false)
+    private val _mapIsReady = MutableStateFlow(false)
     private val _currentMessagesCount = MutableStateFlow(0)
 
     private val _ratingModel = MutableStateFlow(PassengerDashboardUiState.Rating())
@@ -68,13 +72,9 @@ class PassengerDashboardViewModel(
     val uiState = combineTuple(
         _passengerModel,
         _rideModel,
-//        _mapIsReady
+        _mapIsReady,
         _ratingModel
-    ).map { (passenger, rideResult
-//                                      , isMapReady
-        ,ratingModel
-    ) ->
-        val isMapReady = true
+    ).map { (passenger, rideResult, isMapReady, ratingModel) ->
         if (rideResult is ServiceResult.Failure) {
             Log.e("PassengerDashboardViewModel", "error caught in ride model state flow", rideResult.exception)
             return@map PassengerDashboardUiState.Error
@@ -169,14 +169,14 @@ class PassengerDashboardViewModel(
         }
     }
 
-//    private val _autoCompleteList = MutableStateFlow<List<AutoCompleteModel>>(emptyList())
-//    val autoCompleteList: StateFlow<List<AutoCompleteModel>> get() = _autoCompleteList
+    private val _autoCompleteList = MutableStateFlow<List<AutoCompleteModel>>(emptyList())
+    val autoCompleteList: StateFlow<List<AutoCompleteModel>> get() = _autoCompleteList
 
-//    private var passengerLatLng = LatLng()
+    private var passengerLatLng = LatLng()
 
-//    fun mapIsReady() {
-//        _mapIsReady.value = true
-//    }
+    fun mapIsReady() {
+        _mapIsReady.value = true
+    }
 
     private fun getPassenger() = launch(Dispatchers.Main) {
         val getUser = getUser.getUser()
@@ -236,44 +236,38 @@ class PassengerDashboardViewModel(
     }
 
     fun handleSearchItemClick(selectedPlace: AutoCompleteModel) = launch(Dispatchers.Main) {
-//        val getCoordinates = googleService.getPlaceCoordinates(selectedPlace.prediction.placeId)
+        val getCoordinates = googleService.getPlaceCoordinates(selectedPlace.prediction.placeId)
 
-//        when (getCoordinates) {
-//            is ServiceResult.Failure -> {
-//                Log.e("PassengerDashboardViewModel", "handleSearchItemClick:getCoordinates failed", getCoordinates.exception)
-//                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
-//            }
-//            is ServiceResult.Value -> {
-//                if (getCoordinates.value != null &&
-//                    getCoordinates.value!!.place.latLng != null
-//                ) {
+        when (getCoordinates) {
+            is ServiceResult.Failure -> {
+                Log.e("PassengerDashboardViewModel", "handleSearchItemClick:getCoordinates failed", getCoordinates.exception)
+                toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
+            }
+            is ServiceResult.Value -> {
+                if (getCoordinates.value != null &&
+                    getCoordinates.value!!.place.latLng != null
+                ) {
                     attemptToCreateNewRide(
-//                        getCoordinates.value!!,
-                        21.032984273101047, 105.78499946607624,
+                        getCoordinates.value!!,
+//                        21.032984273101047, 105.78499946607624,
                         selectedPlace.address)
-//                } else toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_COORDINATES)
-//            }
-//        }
+                } else toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_COORDINATES)
+            }
+        }
     }
 
     private suspend fun attemptToCreateNewRide(
-//        response: FetchPlaceResponse,
-        lat: Double,
-        lng: Double,
+        response: FetchPlaceResponse,
         address: String) {
         val result = rideService.createRide(
-//            destLat = response.place.latLng!!.latitude,
-//            destLon = response.place.latLng!!.longitude,
-            destLat = lat,
-            destLon = lng,
+            destLat = response.place.latLng!!.latitude,
+            destLon = response.place.latLng!!.longitude,
             destinationAddress = address,
             passengerId = _passengerModel.value!!.userId,
             passengerAvatarUrl = _passengerModel.value!!.avatarPhotoUrl,
             passengerName = _passengerModel.value!!.username,
-//            passengerLat = passengerLatLng.lat,
-//            passengerLon = passengerLatLng.lng
-            passengerLat = lat,
-            passengerLon = lng,
+            passengerLat = passengerLatLng.lat,
+            passengerLon = passengerLatLng.lng,
             pickUpAddress = ""
         )
 
@@ -283,14 +277,14 @@ class PassengerDashboardViewModel(
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
             is ServiceResult.Value -> {
-//                _autoCompleteList.value = emptyList()
+                _autoCompleteList.value = emptyList()
                 Log.d(TAG, "attemptToCreateNewRide: success")
                 observeRideModel(result.value, _passengerModel.value!!)
             }
         }
     }
 
-/*    fun requestAutocompleteResults(query: String) = launch(Dispatchers.Main) {
+    fun requestAutocompleteResults(query: String) = launch(Dispatchers.Main) {
         val autocompleteRequest = googleService.getAutocompleteResults(query)
         when (autocompleteRequest) {
             is ServiceResult.Failure -> {
@@ -306,7 +300,7 @@ class PassengerDashboardViewModel(
                 }
             }
         }
-    }*/
+    }
 
     fun cancelRide() = launch(Dispatchers.Main) {
         when (val cancelRide = rideService.cancelRide()) {
@@ -345,13 +339,15 @@ class PassengerDashboardViewModel(
             _rideModel
                 .distinctUntilChanged()
                 .collect { rideModel ->
-                    if (rideModel is ServiceResult.Value) {
-                        val ride = rideModel.value
-                        if (ride != null && ride.status == RideStatus.ARRIVED.value) {
-                            val saveResult = rideService.saveRide(ride)
-                            if (saveResult is ServiceResult.Value) {
-                                _savedRideId.value = saveResult.value
-                                Log.d(TAG, "ride ${ride.rideId} saved")
+                    if (_savedRideId.value == null) {
+                        if (rideModel is ServiceResult.Value) {
+                            val ride = rideModel.value
+                            if (ride != null && ride.status == RideStatus.ARRIVED.value) {
+                                val saveResult = rideService.saveRide(ride)
+                                if (saveResult is ServiceResult.Value) {
+                                    _savedRideId.value = saveResult.value
+                                    Log.d(TAG, "ride ${ride.rideId} saved")
+                                }
                             }
                         }
                     }
@@ -367,7 +363,7 @@ class PassengerDashboardViewModel(
         sendToLogin()
     }
 
-   /* fun updatePassengerLocation(latLng: LatLng) = launch(Dispatchers.Main) {
+    fun updatePassengerLocation(latLng: LatLng) = launch(Dispatchers.Main) {
         passengerLatLng = latLng
 
         val currentRide = _rideModel.first()
@@ -386,7 +382,7 @@ class PassengerDashboardViewModel(
         } else {
             Log.e("PassengerDashboardViewModel", "updatePassengerLocation:currentRide is null")
         }
-    }*/
+    }
 
     fun openChat() = launch(Dispatchers.Main) {
         val currentRide = _rideModel.first()
@@ -409,11 +405,11 @@ class PassengerDashboardViewModel(
     fun goToProfile() {
         //normally we would use backStack.goTo(...), but we always want to reload the state
         //of the dashboard
-//        backstack.setHistory(
-//            History.of(ProfileSettingsKey()),
-//            StateChange.FORWARD
-//        )
-        backstack.goTo(ProfileSettingsKey())
+        backstack.setHistory(
+            History.of(ProfileSettingsKey()),
+            StateChange.FORWARD
+        )
+//        backstack.goTo(ProfileSettingsKey())
     }
 
     fun sendRating() {
