@@ -35,7 +35,7 @@ class HomeViewModel(
     val backstack: Backstack,
     val getUser: GetUser,
     val rideService: RideService
-    ) : ScopedServices.Activated, CoroutineScope {
+) : ScopedServices.Activated, CoroutineScope {
     private val canceller = Job()
 
     override val coroutineContext: CoroutineContext
@@ -45,21 +45,14 @@ class HomeViewModel(
 
     private val _driverModel = MutableStateFlow<GrabLamUser?>(null)
     private val _rideModel: Flow<ServiceResult<Ride?>> = rideService.rideFlow()
-//    private val _mapIsReady = MutableStateFlow(false)
+    private val _mapIsReady = MutableStateFlow(false)
     private val _currentMessagesCount = MutableStateFlow(0)
 
-    /*
-    Different UI states:
-    1. User may never be null
-    2. Ride may be null (If User.status is INACTIVE, then no need to try to fetch a ride)
-    3. Ride may be not null, and in varying states:
-        - SEARCHING_FOR_DRIVER
-        - PASSENGER_PICK_UP
-        - EN_ROUTE
-        - ARRIVED
-     */
-    val uiState = combineTuple(_driverModel, _rideModel/*, _mapIsReady*/).map { (driver, rideResult/*, isMapReady*/) ->
-        val isMapReady = true
+    val uiState = combineTuple(
+        _driverModel,
+        _rideModel,
+        _mapIsReady
+    ).map { (driver, rideResult, isMapReady) ->
         if (rideResult is ServiceResult.Failure) {
             Log.e(TAG, "error caught in ride model state flow", rideResult.exception)
             return@map HomeUiState.Error
@@ -70,7 +63,7 @@ class HomeViewModel(
         else {
             when {
                 ride == null -> {
-//                    getPassengerList()
+                    getPassengerList()
                     HomeUiState.SearchingForPassengers
                 }
 
@@ -143,12 +136,16 @@ class HomeViewModel(
 
     //I don't want a driver to be able to accept a ride unless we know their location first.
     val locationAwarePassengerList = combineTuple(_driverLocation, _passengerList).map {
-//        if (it.first.lat == DEFAULT_LAT_OR_LON
-//            || it.first.lng == DEFAULT_LAT_OR_LON
-//        ) emptyList()
-//        else {
+        if (it.first.lat == DEFAULT_LAT_OR_LON
+            || it.first.lng == DEFAULT_LAT_OR_LON
+        ) emptyList()
+        else {
             if (it.second is ServiceResult.Failure) {
-                Log.e(TAG, "error caught in passenger list state flow", (it.second as ServiceResult.Failure<List<Ride>>).exception)
+                Log.e(
+                    TAG,
+                    "error caught in passenger list state flow",
+                    (it.second as ServiceResult.Failure<List<Ride>>).exception
+                )
                 handleError()
                 emptyList()
             } else {
@@ -157,12 +154,12 @@ class HomeViewModel(
                     Pair(ride, _driverLocation.value)
                 }
             }
-//        }
+        }
     }
 
-    /*fun mapIsReady() {
+    fun mapIsReady() {
         _mapIsReady.value = true
-    }*/
+    }
 
     fun getDriver() = launch(Dispatchers.Main) {
         val getUser = getUser.getUser()
@@ -172,12 +169,12 @@ class HomeViewModel(
                 toastHandler?.invoke(ToastMessages.GENERIC_ERROR)
                 sendToLogin()
             }
+
             is ServiceResult.Value -> {
                 if (getUser.value == null) {
                     Log.w(TAG, "getDriver: null driver")
                     sendToLogin()
-                }
-                else {
+                } else {
                     Log.d(TAG, "getDriver: success")
                     getActiveRideIfItExists(getUser.value!!)
                 }
@@ -199,6 +196,7 @@ class HomeViewModel(
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 sendToLogin()
             }
+
             is ServiceResult.Value -> {
                 //if null, no active ride exists
                 if (result.value == null) {
@@ -226,15 +224,15 @@ class HomeViewModel(
         _driverModel.value = user
     }
 
-    private suspend fun getPassengerList() {
+    suspend fun getPassengerList() {
         rideService.observeOpenRides()
     }
 
     fun handlePassengerItemClick(clickedRide: Ride) = launch(Dispatchers.Main) {
         //We must only proceed if driver LatLng are real values!
-//        if (_driverLocation.value.lat != DEFAULT_LAT_OR_LON
-//            && _driverLocation.value.lng != DEFAULT_LAT_OR_LON
-//        ) {
+        if (_driverLocation.value.lat != DEFAULT_LAT_OR_LON
+            && _driverLocation.value.lng != DEFAULT_LAT_OR_LON
+        ) {
             val result = rideService.connectDriverToRide(
                 clickedRide.copy(
                     driverLatitude = _driverLocation.value.lat,
@@ -247,15 +245,16 @@ class HomeViewModel(
                     Log.e(TAG, "failed to connect driver to ride", result.exception)
                     toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 }
+
                 is ServiceResult.Value -> {
                     Log.d(TAG, "connect driver to ride successfully")
                     _passengerList = emptyFlow()
                     rideService.observeRideById(result.value)
                 }
             }
-//        } else {
-//            toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_USER_COORDINATES)
-//        }
+        } else {
+            toastHandler?.invoke(ToastMessages.UNABLE_TO_RETRIEVE_USER_COORDINATES)
+        }
     }
 
     fun goToProfile() {
@@ -263,9 +262,10 @@ class HomeViewModel(
             History.of(ProfileSettingsKey()),
             StateChange.FORWARD
         )
+//        backstack.goTo(ProfileSettingsKey())
     }
 
-    /*fun updateDriverLocation(latLng: LatLng) = launch(Dispatchers.Main) {
+    fun updateDriverLocation(latLng: LatLng) = launch(Dispatchers.Main) {
         _driverLocation.value = latLng
 
         val currentRide = _rideModel.first()
@@ -281,7 +281,7 @@ class HomeViewModel(
                 toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
             }
         }
-    }*/
+    }
 
     fun cancelRide() = launch(Dispatchers.Main) {
         when (val cancelRide = rideService.cancelRide()) {
@@ -351,6 +351,7 @@ class HomeViewModel(
                     Log.e("HomeViewModel", "completeRide: failure", completeRide.exception)
                     sendToSplash()
                 }
+
                 is ServiceResult.Value -> {
                     Log.d("HomeViewModel", "completeRide: success")
                     sendToSplash()
@@ -375,8 +376,12 @@ class HomeViewModel(
                     Log.e(TAG, "failed to advance ride", updateRide.exception)
                     toastHandler?.invoke(ToastMessages.SERVICE_ERROR)
                 }
+
                 is ServiceResult.Value -> {
-                    Log.d(TAG, "advanceRide, newState=${(_rideModel.first() as ServiceResult.Value).value?.status ?: "null ride"}")
+                    Log.d(
+                        TAG,
+                        "advanceRide, newState=${(_rideModel.first() as ServiceResult.Value).value?.status ?: "null ride"}"
+                    )
                     Log.d(TAG, "advance ride successfully")
                 }
             }

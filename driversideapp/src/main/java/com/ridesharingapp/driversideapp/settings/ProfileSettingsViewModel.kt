@@ -11,6 +11,7 @@ import com.ridesharingapp.common.uicommon.history.HistoryKey
 import com.ridesharingapp.common.usecases.GetUser
 import com.ridesharingapp.common.usecases.LogOutUser
 import com.ridesharingapp.common.usecases.UpdateUserAvatar
+import com.ridesharingapp.driversideapp.navigation.DriverHomeKey
 import com.ridesharingapp.driversideapp.navigation.LoginKey
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.History
@@ -48,6 +49,7 @@ class ProfileSettingsViewModel(
         logUserOut.logout()
         Log.d(TAG, "Logout successfully")
         sendToLogin()
+        canceller.cancel()
     }
 
     private fun getUser() = launch(Dispatchers.Main) {
@@ -89,7 +91,6 @@ class ProfileSettingsViewModel(
 
     override fun onServiceInactive() {
         historyService.stopListeningForRatingChanges()
-        canceller.cancel()
         toastHandler = null
     }
 
@@ -132,7 +133,13 @@ class ProfileSettingsViewModel(
     }
 
     fun handleBackPress() {
-        backstack.goBack()
+        backstack.setHistory(
+            History.of(DriverHomeKey()),
+            //Direction of navigation which is used for animation
+            StateChange.BACKWARD
+        )
+        canceller.cancel()
+//        backstack.goBack()
     }
 
     private val canceller = Job()

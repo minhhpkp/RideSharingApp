@@ -134,10 +134,14 @@ class StreamRideService(
                                     )
                                 )
                             }
+                        } else {
+                            Log.d("StreamRideService", "observeChannelEvents:ChannelDeletedEvent:" +
+                                    " ride ${event.channelId} is cancelled before arrival")
+                            _rideModelUpdates.value = ServiceResult.Value(null)
                         }
                     } else {
                         Log.d("StreamRideService", "observeChannelEvents:ChannelDeletedEvent:" +
-                            " ride ${event.channelId} is cancelled before arrival")
+                                " ride ${event.channelId} is cancelled before arrival")
                         _rideModelUpdates.value = ServiceResult.Value(null)
                     }
                 }

@@ -1,29 +1,63 @@
 package com.ridesharingapp.driversideapp.home
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.os.Looper
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.location.LocationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.libraries.places.api.Places
+import com.google.maps.DirectionsApi
+import com.google.maps.android.PolyUtil
+import com.google.maps.model.TravelMode
 import com.ridesharingapp.common.R
 import com.ridesharingapp.common.databinding.FragmentDriverHomeBinding
+import com.ridesharingapp.common.uicommon.LOCATION_REQUEST_INTERVAL
 import com.ridesharingapp.common.uicommon.handleToast
+import com.ridesharingapp.driversideapp.BuildConfig
+import com.ridesharingapp.driversideapp.RideSharingApp
 import com.zhuinden.simplestackextensions.fragmentsktx.lookup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(R.layout.fragment_driver_home)
-//    , OnMapReadyCallback
+    , OnMapReadyCallback
 {
     val viewModel by lazy {lookup<HomeViewModel>() }
-//    private var mapView: MapView? = null
-//    private var googleMap: GoogleMap? = null
-//    private var locationRequest: LocationRequest? = null
-//    private lateinit var locationClient: FusedLocationProviderClient
+    private var mapView: MapView? = null
+    private var googleMap: GoogleMap? = null
+    private var locationRequest: LocationRequest? = null
+    private lateinit var locationClient: FusedLocationProviderClient
 
     lateinit var binding: FragmentDriverHomeBinding
 
@@ -31,13 +65,13 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentDriverHomeBinding.bind(view)
-//        Places.initialize(requireActivity().application, BuildConfig.MAPS_API_KEY)
-//        locationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        Places.initialize(requireActivity().application, BuildConfig.MAPS_API_KEY)
+        locationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-//        mapView = binding.mapLayout.mapView
-//        mapView?.onCreate(savedInstanceState)
+        mapView = binding.mapLayout.mapView
+        mapView?.onCreate(savedInstanceState)
 
-//        requestPermission()
+        requestPermission()
 
         lifecycleScope.launch {
             viewModel.uiState
@@ -82,7 +116,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             is HomeUiState.NewMessages -> updateMessageButton(uiState.totalMessages)
         }
 
-//        updateMap(uiState)
+        updateMap(uiState)
     }
 
     private fun updateMessageButton(messageCount: Int) {
@@ -100,8 +134,8 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             //unbind recyclerview from adapter
             passengerList.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
 
             advanceLayout.advanceRideStateLayout.visibility = View.GONE
 
@@ -142,8 +176,8 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             //unbind recyclerview from adapter
             passengerList.adapter = null
 
-//            mapLayout.subtitle.text = getString(R.string.destination)
-//            mapLayout.address.text = uiState.destinationAddress
+            mapLayout.subtitle.text = getString(R.string.destination)
+            mapLayout.address.text = uiState.destinationAddress
 
             advanceLayout.advanceRideStateLayout.visibility = View.VISIBLE
 
@@ -236,7 +270,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
 
             if (passengerList.adapter == null) {
                 passengerList.adapter = PassengerListAdapter().apply {
-//                    getDistance = ::requestDistanceBetweenPointsInKm
+                    getDistance = ::requestDistanceBetweenPointsInKm
                     getDistance = { _, _, _, _ -> "some distance" }
 
                     handleItemClick = {
@@ -272,7 +306,7 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
         }
     }
 
-  /*  @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
 
@@ -295,10 +329,10 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             googleMap.setMinZoomPreference(11f)
             viewModel.mapIsReady()
         }
-    }*/
+    }
 
 
-    /*private fun updateMap(
+    private fun updateMap(
         uiState: HomeUiState
     ) {
         if (googleMap != null) {
@@ -504,9 +538,9 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             }
         }
 
-    }*/
+    }
 
-   /* @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     private fun requestLocation() {
         //This function is a great introduction to programming with the Android SDK ;)
         val locationManager = (requireActivity()
@@ -558,9 +592,9 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             ).show()
             viewModel.handleError()
         }
-    }*/
+    }
 
-   /* @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     private fun startRequestingLocationUpdates(locationRequest: LocationRequest) {
         locationClient.requestLocationUpdates(
             locationRequest,
@@ -585,9 +619,9 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             },
             Looper.myLooper()
         )
-    }*/
+    }
 
-   /* private fun requestPermission() {
+    private fun requestPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -604,9 +638,9 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             //get user location
             requestLocation()
         }
-    }*/
+    }
 
-    /*val requestPermissionLauncher = registerForActivityResult(
+    val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
@@ -620,9 +654,9 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
             ).show()
             viewModel.handleError()
         }
-    }*/
+    }
 
-    /*fun requestDistanceBetweenPointsInKm(
+    fun requestDistanceBetweenPointsInKm(
         originLat: Double?,
         originLon: Double?,
         destinationLat: Double?,
@@ -671,31 +705,31 @@ class HomeFragment : Fragment(R.layout.fragment_driver_home)
                 return getString(R.string.unable_to_calculate_distance)
             }
         }
-    }*/
+    }
 
     //So yeah, if you don't add this crap here, the MapView will be basically useless.
     //Apparently this happenings when working with a MapView that starts out View.INVISIBLE or smth?
-//    override fun onResume() {
-//        mapView?.onResume()
-//        super.onResume()
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        mapView?.onPause()
-//    }
+    override fun onResume() {
+        mapView?.onResume()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView?.onPause()
+    }
 
     override fun onDestroy() {
         super.onDestroy()
-//        mapView?.onDestroy()
+        mapView?.onDestroy()
         if (binding.passengerList.adapter != null) {
             //Safeguard to help avoid issues
             (binding.passengerList.adapter as PassengerListAdapter).getDistance = null
         }
     }
 
-//    override fun onLowMemory() {
-//        super.onLowMemory()
-//        mapView?.onLowMemory()
-//    }
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
+    }
 }
