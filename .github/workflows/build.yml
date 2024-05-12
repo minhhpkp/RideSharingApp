@@ -30,6 +30,16 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "MAPS_API_KEY=$MAPS_API_KEY" >> local.properties
+          echo "STREAM_API_KEY=$STREAM_API_KEY" >> local.properties
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          STREAM_API_KEY: ${{ secrets.STREAM_API_KEY }}
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
