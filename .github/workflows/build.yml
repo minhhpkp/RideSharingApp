@@ -2,7 +2,7 @@ name: SonarCloud
 on:
   push:
     branches:
-      - main
+      - test-ci
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -13,41 +13,49 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
+      - name: Test secret string
+        run: |
+          echo -e $TEST_LONG_SECRET > testfile.txt
+          cat testfile.txt
+          cat local.defaults.properties
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: 17
+#          distribution: 'zulu' # Alternative distribution options are available
+#      - name: Cache SonarCloud packages
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.sonar/cache
+#          key: ${{ runner.os }}-sonar
+#          restore-keys: ${{ runner.os }}-sonar
+#      - name: Cache Gradle packages
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.gradle/caches
+#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+#          restore-keys: ${{ runner.os }}-gradle
       - name: Create local.properties
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           echo "MAPS_API_KEY=$MAPS_API_KEY" >> local.properties
           echo "STREAM_API_KEY=$STREAM_API_KEY" >> local.properties
+          cat local.properties
         env:
-          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
-          STREAM_API_KEY: ${{ secrets.STREAM_API_KEY }}
+          MAPS_API_KEY: ${{ secrets.TEST_SECRET }}
+          STREAM_API_KEY: ${{ secrets.TEST_SECRET }}
       - name: Create google-services.json
         run: |        
-          echo -e $DATA > $GITHUB_WORKSPACE/driversideapp/google-services.json
-          echo -e $DATA > $GITHUB_WORKSPACE/passengersideapp/google-services.json
+          echo -e $DATA > ./driversideapp/google-services.json
+          echo -e $DATA > ./passengersideapp/google-services.json
+          cat ./driversideapp/google-services.json
+          cat ./passengersideapp/google-services.json
         env:
-          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --info
+          DATA: ${{ secrets.TEST_LONG_SECRET }}
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#      - name: Build and analyze
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        run: ./gradlew build sonar --info
