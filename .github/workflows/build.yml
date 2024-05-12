@@ -40,8 +40,8 @@ jobs:
           STREAM_API_KEY: ${{ secrets.STREAM_API_KEY }}
       - name: Create google-services.json
         run: |        
-          echo -e $DATA > $GITHUB_WORKSPACE/driversideapp/google-services.json
-          echo -e $DATA > $GITHUB_WORKSPACE/passengersideapp/google-services.json
+          echo -e $DATA > ./driversideapp/google-services.json
+          echo -e $DATA > ./passengersideapp/google-services.json
         env:
           DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
       - name: Grant execute permission for gradlew
