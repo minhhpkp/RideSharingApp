@@ -23,5 +23,6 @@ sonar {
         property("sonar.projectKey", "minhhpkp_RideSharingApp")
         property("sonar.organization", "minhhpkp")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.androidLint.reportPaths", "${project.buildDir}/reports/lint-results.xml")
     }
 }
