@@ -38,8 +38,12 @@ jobs:
         env:
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
           STREAM_API_KEY: ${{ secrets.STREAM_API_KEY }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Create google-services.json
+        run: |        
+          echo -e $DATA > $GITHUB_WORKSPACE/driversideapp/google-services.json
+          echo -e $DATA > $GITHUB_WORKSPACE/passengersideapp/google-services.json
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build and analyze
