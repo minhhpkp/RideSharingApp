@@ -6,11 +6,13 @@ plugins {
     id("com.google.gms.google-services") version "4.4.0" apply false
     id ("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version("2.0.1") apply false
     id("org.sonarqube") version "5.0.0.4638"
+    id("jacoco")
 }
 
 buildscript {
     dependencies {
         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+        classpath("org.jacoco:org.jacoco.core:0.8.11")
     }
 }
 
@@ -25,4 +27,8 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.androidLint.reportPaths", "${project.buildDir}/reports/lint-results.xml")
     }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
 }
