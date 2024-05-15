@@ -21,6 +21,13 @@ fun IfElseIfWithoutElse(x: Int) {
     } else if (x == 1) {
         println("x equals 1")
     }
+
+    val y = x + 5
+    if (y == 6) {
+        println("y  equals 6")
+    } else if (y == 7){
+        println("y  equals 7")
+    }
 }
 
 fun faultyAddition(a: Int, b: Int): Int {
